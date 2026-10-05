@@ -1,6 +1,7 @@
 ---
 import Base from '../../layouts/Base.astro';
 import ProductCard from '../../components/ProductCard.astro';
+import CtaBanner from '../../components/CtaBanner.astro';
 import { categorias, porCategoria } from '../../lib/catalogo';
 import { waLink, mensajeGeneral } from '../../lib/whatsapp';
 
@@ -23,19 +24,20 @@ const jsonLd = {
 
 <Base title={categoria.nombre} description={categoria.descripcion} jsonLd={jsonLd}>
   <div class="mx-auto max-w-6xl px-4 py-10 sm:px-6">
-    <nav aria-label="Migas de pan" class="text-sm text-ink-500">
+    <nav aria-label="Migas de pan" class="text-sm text-fg-subtle">
       <ol class="flex flex-wrap items-center gap-1.5">
-        <li><a href="/" class="hover:text-brand-700">Inicio</a></li>
+        <li><a href="/" class="hover:text-accent">Inicio</a></li>
         <li aria-hidden="true">/</li>
-        <li><a href="/catalogo" class="hover:text-brand-700">Catálogo</a></li>
+        <li><a href="/catalogo" class="hover:text-accent">Catálogo</a></li>
         <li aria-hidden="true">/</li>
-        <li class="font-medium text-ink-800">{categoria.nombre}</li>
+        <li class="font-medium text-fg-muted">{categoria.nombre}</li>
       </ol>
     </nav>
 
     <header class="mt-6">
-      <h1 class="text-3xl font-extrabold tracking-tight text-ink-900">{categoria.nombre}</h1>
-      <p class="mt-2 text-sm text-ink-600">
+      <span class="kicker">Categoría</span>
+      <h1 class="mt-2 text-3xl font-extrabold tracking-tight text-fg">{categoria.nombre}</h1>
+      <p class="mt-2 text-sm text-fg-muted">
         {categoria.descripcion}
         {lista.length} artículo{lista.length === 1 ? '' : 's'} disponible{lista.length === 1 ? '' : 's'}.
       </p>
@@ -49,9 +51,9 @@ const jsonLd = {
           ))}
         </div>
       ) : (
-        <div class="mt-8 rounded-2xl border border-dashed border-ink-300 p-10 text-center">
-          <p class="text-lg font-bold text-ink-900">Aún no hay artículos en esta categoría</p>
-          <p class="mt-1 text-sm text-ink-500">
+        <div class="mt-8 rounded-2xl border border-dashed border-line-2 p-10 text-center">
+          <p class="text-lg font-bold text-fg">Aún no hay artículos en esta categoría</p>
+          <p class="mt-1 text-sm text-fg-subtle">
             Estamos cargando productos nuevos. Escríbenos por WhatsApp para consultas.
           </p>
           <div class="mt-5 flex justify-center gap-3">
@@ -71,4 +73,6 @@ const jsonLd = {
       )
     }
   </div>
+
+  <CtaBanner />
 </Base>

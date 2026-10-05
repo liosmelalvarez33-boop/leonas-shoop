@@ -1,6 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 import ProductCard from '../components/ProductCard.astro';
+import CtaBanner from '../components/CtaBanner.astro';
 import { categorias, productos, todasLasTallas } from '../lib/catalogo';
 
 const tallas = todasLasTallas();
@@ -26,20 +27,21 @@ const jsonLd = {
 >
   <div class="mx-auto max-w-6xl px-4 py-10 sm:px-6">
     <header>
-      <h1 class="text-3xl font-extrabold tracking-tight text-ink-900">Catálogo</h1>
-      <p class="mt-2 text-sm text-ink-600">
+      <span class="kicker">Encuentra tu estilo</span>
+      <h1 class="mt-2 text-3xl font-extrabold tracking-tight text-fg">Catálogo</h1>
+      <p class="mt-2 text-sm text-fg-muted">
         <span id="conteo">{productos.length}</span> artículos · Usa los filtros para encontrar lo
         que buscas.
       </p>
     </header>
 
     <section
-      class="mt-6 rounded-2xl border border-ink-200 bg-white p-4 sm:p-5"
+      class="mt-6 rounded-2xl border border-line bg-panel p-4 sm:p-5"
       aria-label="Filtros del catálogo"
     >
       <div class="grid gap-3 md:grid-cols-2 lg:grid-cols-5">
         <div class="lg:col-span-2">
-          <label for="f-buscar" class="mb-1 block text-xs font-semibold text-ink-500">Buscar</label
+          <label for="f-buscar" class="mb-1 block text-xs font-semibold text-fg-subtle">Buscar</label
           >
           <input
             type="search"
@@ -50,7 +52,7 @@ const jsonLd = {
           />
         </div>
         <div>
-          <label for="f-categoria" class="mb-1 block text-xs font-semibold text-ink-500"
+          <label for="f-categoria" class="mb-1 block text-xs font-semibold text-fg-subtle"
             >Categoría</label
           >
           <select id="f-categoria" class="input">
@@ -61,7 +63,7 @@ const jsonLd = {
           </select>
         </div>
         <div>
-          <label for="f-condicion" class="mb-1 block text-xs font-semibold text-ink-500"
+          <label for="f-condicion" class="mb-1 block text-xs font-semibold text-fg-subtle"
             >Condición</label
           >
           <select id="f-condicion" class="input">
@@ -71,7 +73,7 @@ const jsonLd = {
           </select>
         </div>
         <div>
-          <label for="f-orden" class="mb-1 block text-xs font-semibold text-ink-500">Ordenar</label>
+          <label for="f-orden" class="mb-1 block text-xs font-semibold text-fg-subtle">Ordenar</label>
           <select id="f-orden" class="input">
             <option value="relevancia">Recomendados</option>
             <option value="precio-asc">Precio: menor a mayor</option>
@@ -83,17 +85,17 @@ const jsonLd = {
 
       <div class="mt-4 flex flex-wrap items-center gap-3">
         <div class="flex flex-wrap items-center gap-2" role="group" aria-label="Filtrar por talla">
-          <span class="text-xs font-semibold text-ink-500">Talla:</span>
+          <span class="text-xs font-semibold text-fg-subtle">Talla:</span>
           <button type="button" class="chip is-active" data-talla="">Todas</button>
           {
             tallas.map((t) => <button type="button" class="chip" data-talla={t}>{t}</button>)
           }
         </div>
-        <label class="ml-auto flex cursor-pointer items-center gap-2 text-sm text-ink-600">
-          <input type="checkbox" id="f-solo-disponibles" class="h-4 w-4 rounded border-ink-300" />
+        <label class="ml-auto flex cursor-pointer items-center gap-2 text-sm text-fg-muted">
+          <input type="checkbox" id="f-solo-disponibles" class="h-4 w-4 rounded border-line-2" />
           Solo disponibles
         </label>
-        <button type="button" id="f-limpiar" class="text-sm font-semibold text-brand-700 hover:text-brand-800"
+        <button type="button" id="f-limpiar" class="text-sm font-semibold text-accent hover:text-accent"
           >Limpiar filtros</button
         >
       </div>
@@ -122,11 +124,13 @@ const jsonLd = {
       }
     </div>
 
-    <div id="vacio" class="hidden rounded-2xl border border-dashed border-ink-300 p-10 text-center">
-      <p class="text-lg font-bold text-ink-900">No encontramos artículos con esos filtros</p>
-      <p class="mt-1 text-sm text-ink-500">Prueba con otra búsqueda o limpia los filtros.</p>
+    <div id="vacio" class="hidden rounded-2xl border border-dashed border-line-2 p-10 text-center">
+      <p class="text-lg font-bold text-fg">No encontramos artículos con esos filtros</p>
+      <p class="mt-1 text-sm text-fg-subtle">Prueba con otra búsqueda o limpia los filtros.</p>
     </div>
   </div>
+
+  <CtaBanner />
 
   <script>
     const grid = document.getElementById('grid') as HTMLDivElement;

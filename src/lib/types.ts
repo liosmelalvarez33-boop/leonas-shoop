@@ -17,6 +17,7 @@ export type Producto = {
 export type Categoria = {
   slug: string;
   nombre: string;
+  icono?: string;
   descripcion: string;
 };
 

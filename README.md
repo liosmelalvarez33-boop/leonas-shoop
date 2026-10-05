@@ -6,7 +6,9 @@ ni pasarelas de pago.
 
 - **Stack:** Astro (sitio 100% estático) + Tailwind CSS
 - **Carrito:** guardado en el navegador (`localStorage`), sin servidor
-- **Pedidos:** mensaje armado hacia `wa.me/5363692615`
+- **Pedidos:** mensaje armado hacia `wa.me/5354704764`
+- **Modo oscuro:** botón ☀/🌙 en el encabezado; respeta la preferencia del visitante y la recuerda
+- **Marca:** logo en `public/img/logo.svg` (cambiarlo por el definitivo junto a `public/favicon.svg`)
 - **Hosting:** Cloudflare Pages (gratis, uso comercial permitido)
 
 ---
@@ -77,8 +79,8 @@ Borra las fotos de ejemplo que quieras reemplazar (`public/img/productos/*.svg`)
 
 Todo está en **`src/data/config.json`**:
 
-- `whatsapp` → número con código de país, solo dígitos (ej. `5363692615`)
-- `whatsappVisible` → cómo se muestra (ej. `+53 63 692615`)
+- `whatsapp` → número con código de país, solo dígitos (ej. `5354704764`)
+- `whatsappVisible` → cómo se muestra (ej. `+53 54704764`)
 - `site` → URL definitiva de la tienda (cambiarla cuando tengas el dominio)
 - `horario`, `entregas`, `pagos`, `redes`, `categorias`
 

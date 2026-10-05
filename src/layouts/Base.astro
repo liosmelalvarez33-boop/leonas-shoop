@@ -31,11 +31,27 @@ const ogImage = new URL(image ?? '/img/og-cover.png', Astro.site);
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script is:inline>
+      (function () {
+        document.documentElement.classList.add('js');
+        try {
+          var tema = localStorage.getItem('leonas_shoop_tema');
+          var oscuro =
+            tema === 'dark' ||
+            (tema !== 'light' &&
+              window.matchMedia('(prefers-color-scheme: dark)').matches);
+          if (oscuro) document.documentElement.classList.add('dark');
+        } catch (e) {
+          /* almacenamiento no disponible */
+        }
+      })();
+    </script>
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <meta name="theme-color" content="#d97706" />
+    <meta name="theme-color" content="#d97706" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0c0a09" media="(prefers-color-scheme: dark)" />
 
     <meta property="og:site_name" content={config.nombre} />
     <meta property="og:title" content={pageTitle} />
@@ -69,5 +85,28 @@ const ogImage = new URL(image ?? '/img/og-cover.png', Astro.site);
     </main>
     <Footer />
     <WhatsAppFab />
+
+    <script>
+      const elementos = document.querySelectorAll<HTMLElement>('[data-reveal]');
+      const reduce =
+        'matchMedia' in window && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      if (reduce || !('IntersectionObserver' in window)) {
+        elementos.forEach((el) => el.classList.add('is-visible'));
+      } else {
+        const observador = new IntersectionObserver(
+          (entradas) => {
+            for (const entrada of entradas) {
+              if (entrada.isIntersecting) {
+                entrada.target.classList.add('is-visible');
+                observador.unobserve(entrada.target);
+              }
+            }
+          },
+          { rootMargin: '0px 0px -8% 0px', threshold: 0.05 },
+        );
+        elementos.forEach((el) => observador.observe(el));
+      }
+    </script>
   </body>
 </html>

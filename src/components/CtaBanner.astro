@@ -1,0 +1,39 @@
+---
+import { mensajeGeneral, waLink } from '../lib/whatsapp';
+
+interface Props {
+  titulo?: string;
+  texto?: string;
+}
+const {
+  titulo = '¿Listo para hacer tu pedido?',
+  texto = 'Elige tus artículos, arma el carrito y envíanos el pedido con un toque. Si prefieres, escríbenos directo y te ayudamos a elegir.',
+} = Astro.props;
+---
+
+<section class="mx-auto mt-14 max-w-6xl px-4 sm:px-6" data-reveal>
+  <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-brand-600 via-brand-700 to-brand-800 p-8 text-white sm:p-12">
+    <div class="pointer-events-none absolute -right-16 -top-24 h-64 w-64 rounded-full bg-white/10"></div>
+    <div class="pointer-events-none absolute -bottom-28 left-12 h-72 w-72 rounded-full bg-black/10"></div>
+    <div class="dots pointer-events-none absolute inset-0 opacity-20"></div>
+
+    <div class="relative max-w-2xl">
+      <p class="text-xs font-bold uppercase tracking-[0.16em] text-white/70">
+        Pedidos por WhatsApp
+      </p>
+      <h2 class="mt-3 text-2xl font-extrabold tracking-tight sm:text-3xl">{titulo}</h2>
+      <p class="mt-3 text-sm leading-relaxed text-white/85 sm:text-base">{texto}</p>
+      <div class="mt-6 flex flex-wrap gap-3">
+        <a href="/catalogo" class="btn-base btn-ghost-light">Ver catálogo</a>
+        <a
+          href={waLink(mensajeGeneral())}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="btn-base border border-white/40 bg-black/20 text-white hover:bg-black/30"
+        >
+          Escríbenos por WhatsApp
+        </a>
+      </div>
+    </div>
+  </div>
+</section>

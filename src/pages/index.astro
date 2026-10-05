@@ -1,12 +1,18 @@
 ---
 import Base from '../layouts/Base.astro';
 import ProductCard from '../components/ProductCard.astro';
+import IconoCategoria from '../components/IconoCategoria.astro';
+import CtaBanner from '../components/CtaBanner.astro';
 import { categorias, conteoPorCategoria, destacados } from '../lib/catalogo';
 import { mensajeGeneral, waLink } from '../lib/whatsapp';
+import { formatPrice } from '../lib/format';
 import config from '../data/config.json';
 
 const destacadosLista = destacados().slice(0, 8);
 const waGeneral = waLink(mensajeGeneral());
+
+const productoCollage1 = destacados()[0];
+const productoCollage2 = destacados()[1];
 
 const pasos = [
   {
@@ -43,89 +49,165 @@ const jsonLd = {
 ---
 
 <Base jsonLd={jsonLd}>
-  <section class="border-b border-ink-200 bg-gradient-to-br from-brand-50 via-white to-white">
-    <div class="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
-      <p
-        class="inline-flex items-center gap-2 rounded-full border border-brand-200 bg-white px-3 py-1 text-xs font-semibold text-brand-800"
-      >
-        Primera y segunda mano
-      </p>
-      <h1 class="mt-4 max-w-3xl text-4xl font-extrabold leading-tight tracking-tight text-ink-900 sm:text-5xl">
-        {config.nombre}
-      </h1>
-      <p class="mt-4 max-w-2xl text-lg leading-relaxed text-ink-600">
-        {config.slogan}. Mira el catálogo a tu ritmo y haz tu pedido directo por WhatsApp:
-        sin registros, sin esperas.
-      </p>
-      <div class="mt-8 flex flex-wrap gap-3">
-        <a href="/catalogo" class="btn-base btn-primary">Ver catálogo</a>
-        <a
-          href={waGeneral}
-          target="_blank"
-          rel="noopener noreferrer"
-          class="btn-base btn-wa">Escríbenos por WhatsApp</a
-        >
-      </div>
-      <ul class="mt-10 flex flex-wrap gap-x-6 gap-y-3 text-sm font-medium text-ink-600">
-        <li class="flex items-center gap-2">
-          <svg class="h-4 w-4 text-brand-600" viewBox="0 0 20 20" fill="currentColor"
-            ><path
-              fill-rule="evenodd"
-              d="M16.7 5.3a1 1 0 010 1.4l-7.5 7.5a1 1 0 01-1.4 0L3.3 9.7a1 1 0 111.4-1.4l3.8 3.8 6.8-6.8a1 1 0 011.4 0z"
-              clip-rule="evenodd"></path></svg
-          >Precios en {config.moneda}
-        </li>
-        <li class="flex items-center gap-2">
-          <svg class="h-4 w-4 text-brand-600" viewBox="0 0 20 20" fill="currentColor"
-            ><path
-              fill-rule="evenodd"
-              d="M16.7 5.3a1 1 0 010 1.4l-7.5 7.5a1 1 0 01-1.4 0L3.3 9.7a1 1 0 111.4-1.4l3.8 3.8 6.8-6.8a1 1 0 011.4 0z"
-              clip-rule="evenodd"></path></svg
-          >{config.entregas.split('(')[0].trim()}
-        </li>
-        <li class="flex items-center gap-2">
-          <svg class="h-4 w-4 text-brand-600" viewBox="0 0 20 20" fill="currentColor"
-            ><path
-              fill-rule="evenodd"
-              d="M16.7 5.3a1 1 0 010 1.4l-7.5 7.5a1 1 0 01-1.4 0L3.3 9.7a1 1 0 111.4-1.4l3.8 3.8 6.8-6.8a1 1 0 011.4 0z"
-              clip-rule="evenodd"></path></svg
-          >Pedidos por WhatsApp {config.whatsappVisible}
-        </li>
-      </ul>
-    </div>
-  </section>
+  <section class="relative overflow-hidden border-b border-line bg-gradient-to-br from-brand-50 via-panel to-panel">
+    <div class="pointer-events-none absolute -right-32 -top-40 h-96 w-96 rounded-full bg-brand-400/25 blur-3xl"></div>
+    <div class="pointer-events-none absolute -left-40 bottom-[-10rem] h-[28rem] w-[28rem] rounded-full bg-brand-600/15 blur-3xl"></div>
+    <div class="dots pointer-events-none absolute inset-0 opacity-30 dark:opacity-15"></div>
 
-  <section class="mx-auto max-w-6xl px-4 py-14 sm:px-6">
-    <div class="flex items-end justify-between gap-4">
-      <h2 class="text-2xl font-extrabold tracking-tight text-ink-900">Categorías</h2>
-      <a href="/catalogo" class="text-sm font-semibold text-brand-700 hover:text-brand-800"
-        >Ver todo →</a
-      >
-    </div>
-    <div class="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-      {
-        categorias.map((cat) => (
-          <a
-            href={`/categoria/${cat.slug}`}
-            class="card flex flex-col justify-between p-4 transition hover:border-brand-300 hover:shadow-md hover:shadow-ink-900/5"
+    <div class="relative mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20 lg:py-24">
+      <div class="lg:max-w-xl lg:pr-6">
+        <span
+          class="inline-flex items-center gap-2 rounded-full border border-brand-300/70 bg-panel px-3 py-1 text-xs font-semibold text-accent shadow-sm dark:border-brand-700"
+        >
+          <span class="h-1.5 w-1.5 rounded-full bg-wa"></span>
+          Primera y segunda mano
+        </span>
+
+        <h1
+          class="mt-5 text-4xl font-extrabold leading-[1.05] tracking-tight text-fg sm:text-5xl lg:text-6xl"
+        >
+          Leonas <span class="text-accent">Shoop</span>
+        </h1>
+
+        <p class="mt-5 max-w-xl text-lg leading-relaxed text-fg-muted">
+          {config.slogan}. Mira el catálogo a tu ritmo y haz tu pedido directo por WhatsApp:
+          sin registros, sin esperas.
+        </p>
+
+        <div class="mt-8 flex flex-wrap gap-3">
+          <a href="/catalogo" class="btn-base btn-primary">Ver catálogo</a>
+          <a href={waGeneral} target="_blank" rel="noopener noreferrer" class="btn-base btn-wa"
+            >Escríbenos por WhatsApp</a
           >
-            <span class="text-base font-bold text-ink-900">{cat.nombre}</span>
-            <span class="mt-6 text-xs font-medium text-ink-500">
-              {conteoPorCategoria(cat.slug)} artículo{conteoPorCategoria(cat.slug) === 1 ? '' : 's'}
-            </span>
-          </a>
-        ))
+        </div>
+
+        <ul class="mt-10 grid gap-3 text-sm font-medium text-fg-muted sm:grid-cols-2">
+          <li class="flex items-center gap-2">
+            <svg class="h-4 w-4 shrink-0 text-accent" viewBox="0 0 20 20" fill="currentColor"
+              ><path
+                fill-rule="evenodd"
+                d="M16.7 5.3a1 1 0 010 1.4l-7.5 7.5a1 1 0 01-1.4 0L3.3 9.7a1 1 0 111.4-1.4l3.8 3.8 6.8-6.8a1 1 0 011.4 0z"
+                clip-rule="evenodd"></path></svg
+            >Precios en {config.moneda}
+          </li>
+          <li class="flex items-center gap-2">
+            <svg class="h-4 w-4 shrink-0 text-accent" viewBox="0 0 20 20" fill="currentColor"
+              ><path
+                fill-rule="evenodd"
+                d="M16.7 5.3a1 1 0 010 1.4l-7.5 7.5a1 1 0 01-1.4 0L3.3 9.7a1 1 0 111.4-1.4l3.8 3.8 6.8-6.8a1 1 0 011.4 0z"
+                clip-rule="evenodd"></path></svg
+            >Entregas en la ciudad y envíos a provincias
+          </li>
+          <li class="flex items-center gap-2">
+            <svg class="h-4 w-4 shrink-0 text-accent" viewBox="0 0 20 20" fill="currentColor"
+              ><path
+                fill-rule="evenodd"
+                d="M16.7 5.3a1 1 0 010 1.4l-7.5 7.5a1 1 0 01-1.4 0L3.3 9.7a1 1 0 111.4-1.4l3.8 3.8 6.8-6.8a1 1 0 011.4 0z"
+                clip-rule="evenodd"></path></svg
+            >Pedidos por WhatsApp {config.whatsappVisible}
+          </li>
+          <li class="flex items-center gap-2">
+            <svg class="h-4 w-4 shrink-0 text-accent" viewBox="0 0 20 20" fill="currentColor"
+              ><path
+                fill-rule="evenodd"
+                d="M16.7 5.3a1 1 0 010 1.4l-7.5 7.5a1 1 0 01-1.4 0L3.3 9.7a1 1 0 111.4-1.4l3.8 3.8 6.8-6.8a1 1 0 011.4 0z"
+                clip-rule="evenodd"></path></svg
+            >Transfermóvil, EnZona o efectivo
+          </li>
+        </ul>
+      </div>
+
+      {
+        productoCollage1 && productoCollage2 && (
+          <div class="pointer-events-none absolute right-6 top-1/2 hidden -translate-y-1/2 xl:block">
+            <div class="relative h-[440px] w-[430px]">
+              <div class="absolute left-0 top-0 w-52 -rotate-6 overflow-hidden rounded-2xl border border-line bg-panel shadow-2xl shadow-black/15">
+                <img
+                  src={`/img/productos/${productoCollage1.imagenes[0]}`}
+                  alt={productoCollage1.titulo}
+                  width="448"
+                  height="560"
+                  class="aspect-[4/5] w-full object-cover"
+                />
+                <div class="flex items-center justify-between px-4 py-3">
+                  <span class="text-sm font-bold text-fg">{productoCollage1.titulo}</span>
+                  <span class="text-sm font-extrabold text-accent">
+                    {config.simbolo}
+                    {formatPrice(productoCollage1.precio)}
+                  </span>
+                </div>
+              </div>
+              <div class="absolute bottom-0 right-0 w-52 rotate-[5deg] overflow-hidden rounded-2xl border border-line bg-panel shadow-2xl shadow-black/15">
+                <img
+                  src={`/img/productos/${productoCollage2.imagenes[0]}`}
+                  alt={productoCollage2.titulo}
+                  width="448"
+                  height="560"
+                  class="aspect-[4/5] w-full object-cover"
+                />
+                <div class="flex items-center justify-between px-4 py-3">
+                  <span class="text-sm font-bold text-fg">{productoCollage2.titulo}</span>
+                  <span class="text-sm font-extrabold text-accent">
+                    {config.simbolo}
+                    {formatPrice(productoCollage2.precio)}
+                  </span>
+                </div>
+              </div>
+              <div class="absolute right-0 top-0 rounded-full border border-line bg-panel px-3.5 py-1.5 text-xs font-bold text-fg shadow-lg shadow-black/10">
+                Envíos a provincia
+              </div>
+              <div class="absolute bottom-1 left-0 rounded-full bg-wa px-3.5 py-1.5 text-xs font-bold text-white shadow-lg">
+                Responde rápido ✓
+              </div>
+            </div>
+          </div>
+        )
       }
     </div>
   </section>
 
-  <section class="mx-auto max-w-6xl px-4 pb-14 sm:px-6">
+  <section class="mx-auto max-w-6xl px-4 py-14 sm:px-6" data-reveal>
     <div class="flex items-end justify-between gap-4">
       <div>
-        <h2 class="text-2xl font-extrabold tracking-tight text-ink-900">Destacados</h2>
-        <p class="mt-1 text-sm text-ink-500">Lo que más está buscando la gente ahora mismo.</p>
+        <span class="kicker">Explora</span>
+        <h2 class="mt-2 text-2xl font-extrabold tracking-tight text-fg">Categorías</h2>
       </div>
-      <a href="/catalogo" class="text-sm font-semibold text-brand-700 hover:text-brand-800"
+      <a href="/catalogo" class="text-sm font-semibold text-accent hover:underline">Ver todo →</a>
+    </div>
+    <div class="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+      {
+        categorias.map((cat) => {
+          const n = conteoPorCategoria(cat.slug);
+          return (
+            <a
+              href={`/categoria/${cat.slug}`}
+              class="card group p-5 transition duration-200 hover:-translate-y-1 hover:border-brand-400 hover:shadow-lg hover:shadow-black/5"
+            >
+              <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-50 text-accent transition group-hover:bg-brand-600 group-hover:text-white">
+                <IconoCategoria nombre={cat.icono} class="h-6 w-6" />
+              </span>
+              <span class="mt-4 block text-base font-bold text-fg">{cat.nombre}</span>
+              <span class="mt-1 block text-xs text-fg-subtle">
+                {n} artículo{n === 1 ? '' : 's'}
+              </span>
+              <span class="mt-3 inline-block text-xs font-semibold text-accent opacity-0 transition group-hover:opacity-100">
+                Ver →
+              </span>
+            </a>
+          );
+        })
+      }
+    </div>
+  </section>
+
+  <section class="mx-auto max-w-6xl px-4 pb-14 sm:px-6" data-reveal>
+    <div class="flex items-end justify-between gap-4">
+      <div>
+        <span class="kicker">Lo más buscado</span>
+        <h2 class="mt-2 text-2xl font-extrabold tracking-tight text-fg">Destacados</h2>
+        <p class="mt-1 text-sm text-fg-subtle">Artículos recién publicados y con más consultas.</p>
+      </div>
+      <a href="/catalogo" class="text-sm font-semibold text-accent hover:underline"
         >Catálogo completo →</a
       >
     </div>
@@ -134,18 +216,22 @@ const jsonLd = {
     </div>
   </section>
 
-  <section class="border-y border-ink-200 bg-ink-50">
+  <section class="border-y border-line bg-sunken" data-reveal>
     <div class="mx-auto max-w-6xl px-4 py-14 sm:px-6">
-      <h2 class="text-2xl font-extrabold tracking-tight text-ink-900">Cómo comprar</h2>
+      <span class="kicker">Así de fácil</span>
+      <h2 class="mt-2 text-2xl font-extrabold tracking-tight text-fg">Cómo comprar</h2>
       <div class="mt-8 grid gap-6 md:grid-cols-3">
         {
           pasos.map((paso) => (
-            <div class="card p-6">
-              <span class="flex h-10 w-10 items-center justify-center rounded-full bg-brand-600 text-base font-extrabold text-white">
+            <div class="card relative p-6">
+              <span class="pointer-events-none absolute right-4 top-2 select-none text-6xl font-extrabold leading-none text-accent/15">
                 {paso.n}
               </span>
-              <h3 class="mt-4 text-lg font-bold text-ink-900">{paso.titulo}</h3>
-              <p class="mt-2 text-sm leading-relaxed text-ink-600">{paso.texto}</p>
+              <span class="relative flex h-10 w-10 items-center justify-center rounded-full bg-brand-600 text-base font-extrabold text-white ring-4 ring-accent/20">
+                {paso.n}
+              </span>
+              <h3 class="relative mt-4 text-lg font-bold text-fg">{paso.titulo}</h3>
+              <p class="relative mt-2 text-sm leading-relaxed text-fg-muted">{paso.texto}</p>
             </div>
           ))
         }
@@ -155,4 +241,6 @@ const jsonLd = {
       </div>
     </div>
   </section>
+
+  <CtaBanner />
 </Base>
