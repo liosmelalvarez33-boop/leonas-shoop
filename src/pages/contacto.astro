@@ -1,0 +1,104 @@
+---
+import Base from '../layouts/Base.astro';
+import config from '../data/config.json';
+import { mensajeGeneral, waLink } from '../lib/whatsapp';
+
+const waGeneral = waLink(mensajeGeneral());
+const redes = Object.entries(config.redes).filter(([, url]) => url && url.trim() !== '');
+const etiquetasRedes: Record<string, string> = {
+  facebook: 'Facebook',
+  instagram: 'Instagram',
+  tiktok: 'TikTok',
+};
+
+const faqs = [
+  {
+    q: '¿Cómo hago un pedido?',
+    a: 'Añade los artículos al carrito, pulsa "Enviar pedido por WhatsApp" y te abrimos el chat con el pedido ya escrito. Confirmamos disponibilidad y coordinamos la entrega.',
+  },
+  {
+    q: '¿Cómo puedo pagar?',
+    a: config.pagos,
+  },
+  {
+    q: '¿Hacen envíos?',
+    a: config.entregas,
+  },
+  {
+    q: '¿Los artículos de segunda mano están en buen estado?',
+    a: 'Sí. Revisamos cada pieza y describimos su estado con detalle. Si necesitas más fotos o información, te las enviamos por WhatsApp antes de comprar.',
+  },
+];
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'ContactPage',
+  name: `Contacto - ${config.nombre}`,
+};
+---
+
+<Base title="Contacto" description={`Escríbenos por WhatsApp al ${config.whatsappVisible}. ${config.horario}.`} jsonLd={jsonLd}>
+  <div class="mx-auto max-w-4xl px-4 py-10 sm:px-6">
+    <h1 class="text-3xl font-extrabold tracking-tight text-ink-900">Contacto</h1>
+    <p class="mt-2 text-ink-600">
+      La forma más rápida de comprar con nosotros es WhatsApp: respondemos en el horario de
+      atención.
+    </p>
+
+    <div class="mt-8 grid gap-6 md:grid-cols-2">
+      <div class="card p-6">
+        <h2 class="text-lg font-bold text-ink-900">WhatsApp</h2>
+        <p class="mt-1 text-2xl font-extrabold text-ink-900">{config.whatsappVisible}</p>
+        <p class="mt-2 text-sm text-ink-500">{config.horario}</p>
+        <a
+          href={waGeneral}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="btn-base btn-wa mt-4 w-full">Abrir chat de WhatsApp</a
+        >
+        {
+          redes.length > 0 && (
+            <div class="mt-4 flex flex-wrap gap-3">
+              {redes.map(([red, url]) => (
+                <a
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="btn-base btn-outline"
+                >
+                  {etiquetasRedes[red] ?? red}
+                </a>
+              ))}
+            </div>
+          )
+        }
+      </div>
+
+      <div class="card p-6">
+        <h2 class="text-lg font-bold text-ink-900">Entregas y pagos</h2>
+        <ul class="mt-3 space-y-3 text-sm text-ink-600">
+          <li><strong class="text-ink-900">Entregas:</strong> {config.entregas}</li>
+          <li><strong class="text-ink-900">Pagos:</strong> {config.pagos}</li>
+          <li><strong class="text-ink-900">Horario:</strong> {config.horario}</li>
+          <li><strong class="text-ink-900">Ubicación:</strong> {config.ubicacion}</li>
+        </ul>
+      </div>
+    </div>
+
+    <section class="mt-12">
+      <h2 class="text-2xl font-extrabold tracking-tight text-ink-900">Preguntas frecuentes</h2>
+      <div class="mt-5 space-y-3">
+        {
+          faqs.map((faq) => (
+            <details class="card p-5">
+              <summary class="cursor-pointer font-bold text-ink-900 marker:content-none">
+                {faq.q}
+              </summary>
+              <p class="mt-3 text-sm leading-relaxed text-ink-600">{faq.a}</p>
+            </details>
+          ))
+        }
+      </div>
+    </section>
+  </div>
+</Base>

@@ -1,0 +1,213 @@
+---
+import Base from '../layouts/Base.astro';
+import ProductCard from '../components/ProductCard.astro';
+import { categorias, productos, todasLasTallas } from '../lib/catalogo';
+
+const tallas = todasLasTallas();
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  name: 'Catálogo completo',
+  isPartOf: { '@type': 'WebSite', name: 'Leonas Shoop' },
+  hasPart: productos.map((p) => ({
+    '@type': 'Product',
+    name: p.titulo,
+    url: `/producto/${p.id}`,
+    offers: { '@type': 'Offer', price: p.precio, priceCurrency: 'CUP' },
+  })),
+};
+---
+
+<Base
+  title="Catálogo"
+  description={`Catálogo completo de ${productos.length} artículos de primera y segunda mano: ropa, zapatos, accesorios y más. Pide por WhatsApp.`}
+  jsonLd={jsonLd}
+>
+  <div class="mx-auto max-w-6xl px-4 py-10 sm:px-6">
+    <header>
+      <h1 class="text-3xl font-extrabold tracking-tight text-ink-900">Catálogo</h1>
+      <p class="mt-2 text-sm text-ink-600">
+        <span id="conteo">{productos.length}</span> artículos · Usa los filtros para encontrar lo
+        que buscas.
+      </p>
+    </header>
+
+    <section
+      class="mt-6 rounded-2xl border border-ink-200 bg-white p-4 sm:p-5"
+      aria-label="Filtros del catálogo"
+    >
+      <div class="grid gap-3 md:grid-cols-2 lg:grid-cols-5">
+        <div class="lg:col-span-2">
+          <label for="f-buscar" class="mb-1 block text-xs font-semibold text-ink-500">Buscar</label
+          >
+          <input
+            type="search"
+            id="f-buscar"
+            class="input"
+            placeholder="Buscar camisa, tenis, bolso..."
+            autocomplete="off"
+          />
+        </div>
+        <div>
+          <label for="f-categoria" class="mb-1 block text-xs font-semibold text-ink-500"
+            >Categoría</label
+          >
+          <select id="f-categoria" class="input">
+            <option value="">Todas</option>
+            {
+              categorias.map((c) => <option value={c.slug}>{c.nombre}</option>)
+            }
+          </select>
+        </div>
+        <div>
+          <label for="f-condicion" class="mb-1 block text-xs font-semibold text-ink-500"
+            >Condición</label
+          >
+          <select id="f-condicion" class="input">
+            <option value="">Todas</option>
+            <option value="nuevo">Nuevo</option>
+            <option value="segundo-uso">Segundo uso</option>
+          </select>
+        </div>
+        <div>
+          <label for="f-orden" class="mb-1 block text-xs font-semibold text-ink-500">Ordenar</label>
+          <select id="f-orden" class="input">
+            <option value="relevancia">Recomendados</option>
+            <option value="precio-asc">Precio: menor a mayor</option>
+            <option value="precio-desc">Precio: mayor a menor</option>
+            <option value="titulo">Nombre A-Z</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="mt-4 flex flex-wrap items-center gap-3">
+        <div class="flex flex-wrap items-center gap-2" role="group" aria-label="Filtrar por talla">
+          <span class="text-xs font-semibold text-ink-500">Talla:</span>
+          <button type="button" class="chip is-active" data-talla="">Todas</button>
+          {
+            tallas.map((t) => <button type="button" class="chip" data-talla={t}>{t}</button>)
+          }
+        </div>
+        <label class="ml-auto flex cursor-pointer items-center gap-2 text-sm text-ink-600">
+          <input type="checkbox" id="f-solo-disponibles" class="h-4 w-4 rounded border-ink-300" />
+          Solo disponibles
+        </label>
+        <button type="button" id="f-limpiar" class="text-sm font-semibold text-brand-700 hover:text-brand-800"
+          >Limpiar filtros</button
+        >
+      </div>
+    </section>
+
+    <div
+      id="grid"
+      class="mt-8 grid grid-cols-2 gap-5 md:grid-cols-3 xl:grid-cols-4"
+      data-total={productos.length}
+    >
+      {
+        productos.map((p, i) => (
+          <div
+            class="flex"
+            data-pos={i}
+            data-categoria={p.categoria}
+            data-condicion={p.condicion}
+            data-estado={p.estado}
+            data-precio={p.precio}
+            data-tallas={p.tallas.join(' ')}
+            data-buscar={`${p.titulo} ${p.descripcion}`.toLowerCase()}
+          >
+            <ProductCard producto={p} />
+          </div>
+        ))
+      }
+    </div>
+
+    <div id="vacio" class="hidden rounded-2xl border border-dashed border-ink-300 p-10 text-center">
+      <p class="text-lg font-bold text-ink-900">No encontramos artículos con esos filtros</p>
+      <p class="mt-1 text-sm text-ink-500">Prueba con otra búsqueda o limpia los filtros.</p>
+    </div>
+  </div>
+
+  <script>
+    const grid = document.getElementById('grid') as HTMLDivElement;
+    const vacio = document.getElementById('vacio') as HTMLDivElement;
+    const conteo = document.getElementById('conteo') as HTMLElement;
+    const buscar = document.getElementById('f-buscar') as HTMLInputElement;
+    const selCategoria = document.getElementById('f-categoria') as HTMLSelectElement;
+    const selCondicion = document.getElementById('f-condicion') as HTMLSelectElement;
+    const selOrden = document.getElementById('f-orden') as HTMLSelectElement;
+    const chkDisponibles = document.getElementById('f-solo-disponibles') as HTMLInputElement;
+    const btnLimpiar = document.getElementById('f-limpiar') as HTMLButtonElement;
+    const chipsTalla = [...document.querySelectorAll<HTMLButtonElement>('[data-talla]')];
+
+    const items = [...grid.children] as HTMLDivElement[];
+    let tallaActiva = '';
+
+    function aplicar() {
+      const texto = buscar.value.trim().toLowerCase();
+      const categoria = selCategoria.value;
+      const condicion = selCondicion.value;
+      const soloDisponibles = chkDisponibles.checked;
+
+      let visibles = 0;
+      for (const el of items) {
+        const d = el.dataset;
+        const okBusca = !texto || (d.buscar ?? '').includes(texto);
+        const okCat = !categoria || d.categoria === categoria;
+        const okCond = !condicion || d.condicion === condicion;
+        const okTalla = !tallaActiva || (d.tallas ?? '').split(' ').includes(tallaActiva);
+        const okEstado = !soloDisponibles || d.estado === 'disponible';
+        const visible = okBusca && okCat && okCond && okTalla && okEstado;
+        el.classList.toggle('hidden', !visible);
+        if (visible) visibles++;
+      }
+
+      const orden = selOrden.value;
+      const ordenados = [...items].sort((a, b) => {
+        if (orden === 'precio-asc') return Number(a.dataset.precio) - Number(b.dataset.precio);
+        if (orden === 'precio-desc') return Number(b.dataset.precio) - Number(a.dataset.precio);
+        if (orden === 'titulo')
+          return (a.dataset.buscar ?? '').localeCompare(b.dataset.buscar ?? '', 'es');
+        return Number(a.dataset.pos) - Number(b.dataset.pos);
+      });
+      for (const el of ordenados) grid.appendChild(el);
+
+      conteo.textContent = String(visibles);
+      vacio.classList.toggle('hidden', visibles > 0);
+      grid.classList.toggle('hidden', visibles === 0);
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('categoria')) selCategoria.value = params.get('categoria') ?? '';
+    if (params.get('condicion')) selCondicion.value = params.get('condicion') ?? '';
+    if (params.get('q')) buscar.value = params.get('q') ?? '';
+
+    buscar.addEventListener('input', aplicar);
+    selCategoria.addEventListener('change', aplicar);
+    selCondicion.addEventListener('change', aplicar);
+    selOrden.addEventListener('change', aplicar);
+    chkDisponibles.addEventListener('change', aplicar);
+
+    for (const chip of chipsTalla) {
+      chip.addEventListener('click', () => {
+        chipsTalla.forEach((c) => c.classList.remove('is-active'));
+        chip.classList.add('is-active');
+        tallaActiva = chip.dataset.talla ?? '';
+        aplicar();
+      });
+    }
+
+    btnLimpiar.addEventListener('click', () => {
+      buscar.value = '';
+      selCategoria.value = '';
+      selCondicion.value = '';
+      selOrden.value = 'relevancia';
+      chkDisponibles.checked = false;
+      tallaActiva = '';
+      chipsTalla.forEach((c) => c.classList.toggle('is-active', c.dataset.talla === ''));
+      aplicar();
+    });
+
+    aplicar();
+  </script>
+</Base>

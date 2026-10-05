@@ -1,0 +1,25 @@
+{
+  "nombre": "Leonas Shoop",
+  "slogan": "Ropa, zapatos y artículos variados de primera y segunda mano",
+  "whatsapp": "5363692615",
+  "whatsappVisible": "+53 63 692615",
+  "site": "https://leonas-shoop.pages.dev",
+  "moneda": "CUP",
+  "simbolo": "$",
+  "ubicacion": "Cuba",
+  "horario": "Lunes a sábado: 9:00 AM - 8:00 PM",
+  "entregas": "Entregas en la ciudad y envíos a provincias (coordinamos todo por WhatsApp).",
+  "pagos": "Transfermóvil, EnZona o efectivo al momento de la entrega.",
+  "redes": {
+    "facebook": "",
+    "instagram": "",
+    "tiktok": ""
+  },
+  "categorias": [
+    { "slug": "ropa", "nombre": "Ropa", "descripcion": "Camisas, vestidos, jeans, blusas y más." },
+    { "slug": "zapatos", "nombre": "Zapatos", "descripcion": "Zapatos, tenis y sandalias para todos." },
+    { "slug": "accesorios", "nombre": "Accesorios", "descripcion": "Bolsos, relojes, mochilas y complementos." },
+    { "slug": "hogar", "nombre": "Hogar", "descripcion": "Artículos para el hogar." },
+    { "slug": "otros", "nombre": "Otros", "descripcion": "Artículos variados de segunda mano." }
+  ]
+}

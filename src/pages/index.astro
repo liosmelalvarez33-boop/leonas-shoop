@@ -1,0 +1,158 @@
+---
+import Base from '../layouts/Base.astro';
+import ProductCard from '../components/ProductCard.astro';
+import { categorias, conteoPorCategoria, destacados } from '../lib/catalogo';
+import { mensajeGeneral, waLink } from '../lib/whatsapp';
+import config from '../data/config.json';
+
+const destacadosLista = destacados().slice(0, 8);
+const waGeneral = waLink(mensajeGeneral());
+
+const pasos = [
+  {
+    n: '1',
+    titulo: 'Elige tus artículos',
+    texto: 'Recorre el catálogo, filtra por talla o condición y añade lo que te guste al carrito.',
+  },
+  {
+    n: '2',
+    titulo: 'Envía tu pedido',
+    texto: 'Al terminar, tu pedido se abre en WhatsApp con los artículos, cantidades y total ya escritos.',
+  },
+  {
+    n: '3',
+    titulo: 'Coordinamos todo',
+    texto: 'Confirmamos disponibilidad, entrega y pago (Transfermóvil, EnZona o efectivo) por chat.',
+  },
+];
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Store',
+  name: config.nombre,
+  description: config.slogan,
+  url: config.site,
+  image: `${config.site}/img/og-cover.png`,
+  telephone: config.whatsappVisible,
+  priceRange: '$$',
+  address: { '@type': 'PostalAddress', addressCountry: 'CU' },
+  areaServed: 'Cuba',
+  openingHours: 'Mo-Sa 09:00-20:00',
+  sameAs: Object.values(config.redes).filter((u) => u && u.trim() !== ''),
+};
+---
+
+<Base jsonLd={jsonLd}>
+  <section class="border-b border-ink-200 bg-gradient-to-br from-brand-50 via-white to-white">
+    <div class="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
+      <p
+        class="inline-flex items-center gap-2 rounded-full border border-brand-200 bg-white px-3 py-1 text-xs font-semibold text-brand-800"
+      >
+        Primera y segunda mano
+      </p>
+      <h1 class="mt-4 max-w-3xl text-4xl font-extrabold leading-tight tracking-tight text-ink-900 sm:text-5xl">
+        {config.nombre}
+      </h1>
+      <p class="mt-4 max-w-2xl text-lg leading-relaxed text-ink-600">
+        {config.slogan}. Mira el catálogo a tu ritmo y haz tu pedido directo por WhatsApp:
+        sin registros, sin esperas.
+      </p>
+      <div class="mt-8 flex flex-wrap gap-3">
+        <a href="/catalogo" class="btn-base btn-primary">Ver catálogo</a>
+        <a
+          href={waGeneral}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="btn-base btn-wa">Escríbenos por WhatsApp</a
+        >
+      </div>
+      <ul class="mt-10 flex flex-wrap gap-x-6 gap-y-3 text-sm font-medium text-ink-600">
+        <li class="flex items-center gap-2">
+          <svg class="h-4 w-4 text-brand-600" viewBox="0 0 20 20" fill="currentColor"
+            ><path
+              fill-rule="evenodd"
+              d="M16.7 5.3a1 1 0 010 1.4l-7.5 7.5a1 1 0 01-1.4 0L3.3 9.7a1 1 0 111.4-1.4l3.8 3.8 6.8-6.8a1 1 0 011.4 0z"
+              clip-rule="evenodd"></path></svg
+          >Precios en {config.moneda}
+        </li>
+        <li class="flex items-center gap-2">
+          <svg class="h-4 w-4 text-brand-600" viewBox="0 0 20 20" fill="currentColor"
+            ><path
+              fill-rule="evenodd"
+              d="M16.7 5.3a1 1 0 010 1.4l-7.5 7.5a1 1 0 01-1.4 0L3.3 9.7a1 1 0 111.4-1.4l3.8 3.8 6.8-6.8a1 1 0 011.4 0z"
+              clip-rule="evenodd"></path></svg
+          >{config.entregas.split('(')[0].trim()}
+        </li>
+        <li class="flex items-center gap-2">
+          <svg class="h-4 w-4 text-brand-600" viewBox="0 0 20 20" fill="currentColor"
+            ><path
+              fill-rule="evenodd"
+              d="M16.7 5.3a1 1 0 010 1.4l-7.5 7.5a1 1 0 01-1.4 0L3.3 9.7a1 1 0 111.4-1.4l3.8 3.8 6.8-6.8a1 1 0 011.4 0z"
+              clip-rule="evenodd"></path></svg
+          >Pedidos por WhatsApp {config.whatsappVisible}
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="mx-auto max-w-6xl px-4 py-14 sm:px-6">
+    <div class="flex items-end justify-between gap-4">
+      <h2 class="text-2xl font-extrabold tracking-tight text-ink-900">Categorías</h2>
+      <a href="/catalogo" class="text-sm font-semibold text-brand-700 hover:text-brand-800"
+        >Ver todo →</a
+      >
+    </div>
+    <div class="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+      {
+        categorias.map((cat) => (
+          <a
+            href={`/categoria/${cat.slug}`}
+            class="card flex flex-col justify-between p-4 transition hover:border-brand-300 hover:shadow-md hover:shadow-ink-900/5"
+          >
+            <span class="text-base font-bold text-ink-900">{cat.nombre}</span>
+            <span class="mt-6 text-xs font-medium text-ink-500">
+              {conteoPorCategoria(cat.slug)} artículo{conteoPorCategoria(cat.slug) === 1 ? '' : 's'}
+            </span>
+          </a>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="mx-auto max-w-6xl px-4 pb-14 sm:px-6">
+    <div class="flex items-end justify-between gap-4">
+      <div>
+        <h2 class="text-2xl font-extrabold tracking-tight text-ink-900">Destacados</h2>
+        <p class="mt-1 text-sm text-ink-500">Lo que más está buscando la gente ahora mismo.</p>
+      </div>
+      <a href="/catalogo" class="text-sm font-semibold text-brand-700 hover:text-brand-800"
+        >Catálogo completo →</a
+      >
+    </div>
+    <div class="mt-6 grid grid-cols-2 gap-5 md:grid-cols-3 xl:grid-cols-4">
+      {destacadosLista.map((p) => <ProductCard producto={p} />)}
+    </div>
+  </section>
+
+  <section class="border-y border-ink-200 bg-ink-50">
+    <div class="mx-auto max-w-6xl px-4 py-14 sm:px-6">
+      <h2 class="text-2xl font-extrabold tracking-tight text-ink-900">Cómo comprar</h2>
+      <div class="mt-8 grid gap-6 md:grid-cols-3">
+        {
+          pasos.map((paso) => (
+            <div class="card p-6">
+              <span class="flex h-10 w-10 items-center justify-center rounded-full bg-brand-600 text-base font-extrabold text-white">
+                {paso.n}
+              </span>
+              <h3 class="mt-4 text-lg font-bold text-ink-900">{paso.titulo}</h3>
+              <p class="mt-2 text-sm leading-relaxed text-ink-600">{paso.texto}</p>
+            </div>
+          ))
+        }
+      </div>
+      <div class="mt-10">
+        <a href="/catalogo" class="btn-base btn-dark">Empezar a comprar</a>
+      </div>
+    </div>
+  </section>
+</Base>
