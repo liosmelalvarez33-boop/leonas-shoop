@@ -74,8 +74,21 @@ function ogSvg() {
   <circle cx="120" cy="580" r="210" fill="#000000" opacity="0.14"/>
   <g transform="translate(80 90)">
     <rect width="110" height="110" rx="30" fill="url(#mark)"/>
-    <path d="M40 26v40a12 12 0 0 0 12 12h23" fill="none" stroke="#fff" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
-    <circle cx="79" cy="34" r="9" fill="#fff"/>
+    <g transform="scale(1.71875)">
+      <g stroke="#fff" stroke-width="1.7" stroke-linecap="round" opacity="0.95">
+        <path d="M16.5 37.5 7.5 35.5"/>
+        <path d="M16.5 41.5 7.5 43"/>
+        <path d="M47.5 37.5 56.5 35.5"/>
+        <path d="M47.5 41.5 56.5 43"/>
+      </g>
+      <circle cx="20.5" cy="21.5" r="7.5" fill="#fff"/>
+      <circle cx="43.5" cy="21.5" r="7.5" fill="#fff"/>
+      <circle cx="32" cy="34.5" r="14.5" fill="#fff"/>
+      <ellipse cx="27" cy="32.5" rx="2.3" ry="2.9" fill="#78350f"/>
+      <ellipse cx="37" cy="32.5" rx="2.3" ry="2.9" fill="#78350f"/>
+      <path d="M29.1 37.4H34.9L32 40.1Z" fill="#78350f"/>
+      <path d="M32 40.1v1.6M32 41.7q-2.7 2.7-5.2.5M32 41.7q2.7 2.7 5.2.5" fill="none" stroke="#78350f" stroke-width="1.5" stroke-linecap="round"/>
+    </g>
   </g>
   <text x="80" y="330" font-family="system-ui, -apple-system, Segoe UI, Roboto, sans-serif" font-size="92" font-weight="800" fill="#ffffff">${nombre}</text>
   <text x="80" y="400" font-family="system-ui, -apple-system, Segoe UI, Roboto, sans-serif" font-size="36" font-weight="500" fill="#ffffff" fill-opacity="0.9">${slogan}</text>
@@ -96,8 +109,19 @@ function faviconSvg() {
     </linearGradient>
   </defs>
   <rect width="64" height="64" rx="17" fill="url(#f-g)"/>
-  <path d="M23 15v23a7 7 0 0 0 7 7h13" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
-  <circle cx="45.5" cy="19.5" r="5.5" fill="#fff"/>
+  <g stroke="#fff" stroke-width="1.7" stroke-linecap="round" opacity="0.95">
+    <path d="M16.5 37.5 7.5 35.5"/>
+    <path d="M16.5 41.5 7.5 43"/>
+    <path d="M47.5 37.5 56.5 35.5"/>
+    <path d="M47.5 41.5 56.5 43"/>
+  </g>
+  <circle cx="20.5" cy="21.5" r="7.5" fill="#fff"/>
+  <circle cx="43.5" cy="21.5" r="7.5" fill="#fff"/>
+  <circle cx="32" cy="34.5" r="14.5" fill="#fff"/>
+  <ellipse cx="27" cy="32.5" rx="2.3" ry="2.9" fill="#78350f"/>
+  <ellipse cx="37" cy="32.5" rx="2.3" ry="2.9" fill="#78350f"/>
+  <path d="M29.1 37.4H34.9L32 40.1Z" fill="#78350f"/>
+  <path d="M32 40.1v1.6M32 41.7q-2.7 2.7-5.2.5M32 41.7q2.7 2.7 5.2.5" fill="none" stroke="#78350f" stroke-width="1.5" stroke-linecap="round"/>
 </svg>
 `;
 }
