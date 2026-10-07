@@ -18,6 +18,7 @@ ni pasarelas de pago.
 ```bash
 npm install          # instalar dependencias (solo la primera vez)
 npm run dev          # desarrollo en http://localhost:4321
+npm run panel        # panel de administración en http://localhost:4399
 npm run build        # generar el sitio en dist/
 npm run preview      # ver dist/ en local
 npm run placeholders # regenerar fotos de ejemplo (no borra las tuyas)
@@ -27,6 +28,20 @@ npx astro check      # revisar tipos/errores
 ---
 
 ## Cómo agregar un producto
+
+### Desde el panel (recomendado)
+
+1. En una terminal: `npm run panel` y abre **http://localhost:4399**.
+2. Pulsa **＋ Nuevo producto**, rellena título, precio, tallas, etc.
+   (el ID de la URL se genera solo del título; arrastra las fotos y se reducen solas a 1200 px en WebP).
+3. **Guardar** lo deja listo en el catálogo.
+4. **🚀 Publicar cambios** compila el sitio y lo sube a la web (tarda ~30-60 segundos
+   y ves el log en pantalla; al terminar te da el enlace).
+
+Con el panel también puedes **Editar** (lápiz) y **Eliminar** cualquier producto, y
+buscar o filtrar por categoría.
+
+### A mano (opcional)
 
 1. Abre **`src/data/products.json`**.
 2. Copia un bloque existente y pégalo al final (antes del corchete de cierre `]`).
@@ -65,6 +80,9 @@ npx astro check      # revisar tipos/errores
 
 ### Cómo agregar sus fotos
 
+> Si usas el panel, no hagas nada de esto: **arrastra las fotos** al formulario y él las
+> redimensiona, las convierte a `.webp` y las registra por ti.
+
 1. **Prepara las fotos:** máximo **1200 px** de ancho, formato **`.webp`** (o `.jpg`).
    En el celular: comparte → "mejor calidad" → redimensiona con alguna app antes de subir.
    Peso ideal: **menos de 200 KB** por foto (importante para quien navegue con datos en Cuba).
@@ -88,34 +106,35 @@ Todo está en **`src/data/config.json`**:
 
 ## Publicar en Cloudflare Pages (gratis)
 
-1. **Crea la cuenta:** entra a [dash.cloudflare.com](https://dash.cloudflare.com) y regístrate
-   (correo y contraseña, sin tarjeta).
-2. **Sube el código a GitHub:**
-   ```bash
-   git init
-   git add .
-   git commit -m "Leonas Shoop: tienda con pedidos por WhatsApp"
-   ```
-   Luego crea un repositorio en [github.com/new](https://github.com/new) (público o privado) y:
-   ```bash
-   git remote add origin https://github.com/TU-USUARIO/leonas-shoop.git
-   git branch -M main
-   git push -u origin main
-   ```
-3. **Conecta Cloudflare:** en Cloudflare Dashboard → **Workers & Pages** → **Create** →
-   **Pages** → **Connect to Git** → autoriza GitHub → selecciona el repositorio.
-4. **Build settings** (deja lo que proponga, pero verifica):
-   - Framework preset: **Astro**
-   - Build command: `npm run build`
-   - Build output directory: `dist`
-5. **Deploy.** En unos segundos tendrás algo como `https://leonas-shoop.pages.dev`.
+**Forma fácil:** el botón **🚀 Publicar cambios** del panel (`npm run panel`) hace todo:
+compila y sube el sitio a `https://leonas-shoop.pages.dev`.
 
-### Después del deploy
+**Desde la terminal** (equivale al botón):
 
-- En `src/data/config.json` cambia `"site"` a tu URL real (`https://tu-tienda.pages.dev`)
-  y vuelve a desplegar (importante para el SEO y los enlaces compartidos).
-- Cada vez que edites productos: `git add . && git commit -m "Nuevos productos" && git push`
-  → Cloudflare reconstruye y publica solo.
+```bash
+npm run build
+node node_modules/wrangler/bin/wrangler.js pages deploy dist --project-name=leonas-shoop --branch main
+```
+
+La primera vez te pide iniciar sesión en Cloudflare (ya está hecho en esta compu).
+Si te dice que falló la resolución de DNS, antepón
+`NODE_OPTIONS="--dns-result-order=ipv4first"` al comando.
+
+<details>
+<summary>Historial: cómo se creó el sitio (solo referencia)</summary>
+
+1. **Cuenta:** [dash.cloudflare.com](https://dash.cloudflare.com) (correo y contraseña, sin tarjeta).
+2. **Proyecto Pages** creado desde la API de Cloudflare (nombre: `leonas-shoop`).
+3. **Despliegue** con wrangler en local, sin conexión a GitHub.
+4. `src/data/config.json` → `"site": "https://leonas-shoop.pages.dev"` (para SEO y enlaces).
+
+</details>
+
+### Después de cada publicación
+
+- Edita productos desde el panel → **Publicar cambios**. No hace falta Git ni tocar la terminal.
+- Si prefieres Git: `git add . && git commit -m "Nuevos productos" && git push` con una
+  integración de Cloudflare a GitHub, reconstruye y publica solo (setup distinto).
 
 ### Dominio propio (opcional, después)
 
@@ -166,11 +185,13 @@ leonas-shoop/
 │   ├── lib/                   ← carrito, mensajes de WhatsApp, catálogo
 │   └── layouts/Base.astro
 ├── public/img/productos/      ← fotos de los artículos
-└── scripts/gen-placeholders.mjs
+└── scripts/
+    ├── panel.mjs              ← servidor del panel (npm run panel)
+    ├── panel.html             ← interfaz del panel (http://localhost:4399)
+    └── gen-placeholders.mjs
 ```
 
 ## Próximas ideas (no incluidas aún)
 
 - Página "Cómo pagar" con los QR de Transfermóvil y EnZona.
-- Panel de administración web para cargar productos sin tocar archivos.
 - Estados de pedido guardados (pendiente → confirmado → entregado).
