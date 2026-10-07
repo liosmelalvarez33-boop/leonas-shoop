@@ -1,5 +1,6 @@
 ---
 import config from '../data/config.json';
+import InstallButton from './InstallButton.astro';
 
 const categorias = config.categorias;
 const rutaActual = Astro.url.pathname;
@@ -74,6 +75,8 @@ const claseLink = (activa: boolean) =>
     </nav>
 
     <div class="flex items-center gap-2">
+      <InstallButton />
+
       <button
         type="button"
         id="theme-toggle"

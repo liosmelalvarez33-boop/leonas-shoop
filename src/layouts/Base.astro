@@ -50,8 +50,14 @@ const ogImage = new URL(image ?? '/img/og-cover.png', Astro.site);
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
     <meta name="theme-color" content="#d97706" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#0c0a09" media="(prefers-color-scheme: dark)" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Leonas Shoop" />
 
     <meta property="og:site_name" content={config.nombre} />
     <meta property="og:title" content={pageTitle} />
@@ -106,6 +112,14 @@ const ogImage = new URL(image ?? '/img/og-cover.png', Astro.site);
           { rootMargin: '0px 0px -8% 0px', threshold: 0.05 },
         );
         elementos.forEach((el) => observador.observe(el));
+      }
+    </script>
+
+    <script>
+      if ('serviceWorker' in navigator && import.meta.env.PROD) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').catch(() => {});
+        });
       }
     </script>
   </body>

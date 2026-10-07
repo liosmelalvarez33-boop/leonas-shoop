@@ -22,6 +22,7 @@ npm run panel        # panel de administración en http://localhost:4399
 npm run build        # generar el sitio en dist/
 npm run preview      # ver dist/ en local
 npm run placeholders # regenerar fotos de ejemplo (no borra las tuyas)
+npm run icons        # regenerar los íconos de la app (PWA)
 npx astro check      # revisar tipos/errores
 ```
 
@@ -101,6 +102,27 @@ Todo está en **`src/data/config.json`**:
 - `whatsappVisible` → cómo se muestra (ej. `+53 54704764`)
 - `site` → URL definitiva de la tienda (cambiarla cuando tengas el dominio)
 - `horario`, `entregas`, `pagos`, `redes`, `categorias`
+
+---
+
+## La app (PWA)
+
+La tienda se puede **instalar como app** en el celular y la PC, y ver el catálogo
+**sin internet**:
+
+- **Android (Chrome):** toca el botón **📲 Instalar** del encabezado o el menú ⋮ →
+  «Instalar aplicación». El ícono de la leona aparece en la pantalla de inicio.
+- **iPhone (Safari):** botón **📲 Instalar** → «Compartir ▲» → «Añadir a pantalla de inicio».
+- **PC (Chrome/Edge):** botón **📲 Instalar** del encabezado.
+
+**Funciona sin datos:** el service worker (`public/sw.js`) guarda el catálogo y las fotos;
+el pedido por WhatsApp se envía cuando haya conexión. Al publicar cambios desde el panel,
+la web siempre muestra lo último (las páginas se cargan de la red primero).
+
+Archivos: `public/manifest.webmanifest` (qué app es), `public/icons/` (íconos, se
+regeneran con `npm run icons` desde `public/img/logo.svg`) y `public/sw.js` (caché
+offline). Si cambias el nombre de la caché en `sw.js` (`leonas-v1` → `v2`), los
+usuarios descargan la versión nueva automáticamente.
 
 ---
 

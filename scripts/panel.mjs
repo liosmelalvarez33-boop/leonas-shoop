@@ -18,11 +18,19 @@ mkdirSync(IMG_DIR, { recursive: true });
 const leerProductos = () => JSON.parse(readFileSync(PRODUCTS, 'utf8'));
 const leerConfig = () => JSON.parse(readFileSync(CONFIG, 'utf8'));
 // Preserva el formato del archivo: arrays de strings simples en una sola línea.
+const BACKUP = path.join(ROOT, 'scripts/.products.backup.json');
 const guardarProductos = (lista) => {
   const texto = (JSON.stringify(lista, null, 2) + '\n').replace(/\[\n((?:\s+(?:"(?:[^"\\]|\\.)*"|true|false|null|-?\d+(?:\.\d+)?),?\n)+)\s*\]/g, (m, cuerpo) => {
     const items = cuerpo.match(/(?:"(?:[^"\\]|\\.)*"|true|false|null|-?\d+(?:\.\d+)?)/g);
     return items ? '[' + items.join(', ') + ']' : m;
   });
+  // Copia de seguridad del contenido anterior antes de cada escritura.
+  try {
+    const actual = readFileSync(PRODUCTS);
+    if (actual.toString('utf8').trim() !== '[]') writeFileSync(BACKUP, actual);
+  } catch {
+    /* primera vez */
+  }
   writeFileSync(PRODUCTS, texto);
 };
 

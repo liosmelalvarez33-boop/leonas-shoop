@@ -21,3 +21,4 @@ pnpm-debug.log*
 .vercel
 .netlify
 .wrangler
+scripts/.products.backup.json

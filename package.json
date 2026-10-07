@@ -8,6 +8,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "placeholders": "node scripts/gen-placeholders.mjs",
+    "icons": "node scripts/gen-icons.mjs",
     "panel": "node scripts/panel.mjs"
   },
   "dependencies": {
