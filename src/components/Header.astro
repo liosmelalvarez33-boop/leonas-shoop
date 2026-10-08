@@ -55,11 +55,13 @@ const claseLink = (activa: boolean) =>
         </summary>
         <div
           class="absolute right-0 top-full w-56 rounded-xl border border-line bg-panel p-2 shadow-xl shadow-black/10"
+          data-categorias="menu"
         >
           {
             categorias.map((cat) => (
               <a
-                href={`/categoria/${cat.slug}`}
+                href={`/catalogo?categoria=${cat.slug}`}
+                data-slug={cat.slug}
                 class="block rounded-lg px-3 py-2 text-sm font-medium text-fg-muted hover:bg-brand-50 hover:text-accent"
               >
                 {cat.nombre}
@@ -142,18 +144,20 @@ const claseLink = (activa: boolean) =>
         href="/catalogo"
         class="rounded-lg px-3 py-2.5 text-sm font-medium text-fg-muted hover:bg-sunken">Catálogo</a
       >
-      {
-        categorias.map((cat) => (
-          <a
-            href={`/categoria/${cat.slug}`}
-            class="rounded-lg px-3 py-2.5 text-sm font-medium text-fg-muted hover:bg-sunken"
-          >
-            {cat.nombre}
-          </a>
-        ))
-      }
-      <a
-        href="/contacto"
+      <div data-categorias="menu">
+        {
+          categorias.map((cat) => (
+            <a
+              href={`/catalogo?categoria=${cat.slug}`}
+              data-slug={cat.slug}
+              class="block rounded-lg px-3 py-2.5 text-sm font-medium text-fg-muted hover:bg-brand-50 hover:text-accent"
+            >
+              {cat.nombre}
+            </a>
+          ))
+        }
+      </div>
+      <a href="/contacto"
         class="rounded-lg px-3 py-2.5 text-sm font-medium text-fg-muted hover:bg-sunken">Contacto</a
       >
     </div>

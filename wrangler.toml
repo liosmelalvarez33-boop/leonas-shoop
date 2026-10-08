@@ -1,0 +1,9 @@
+# Configuración del proyecto Cloudflare Pages (sitio + Functions del panel).
+name = "leonas-shoop"
+compatibility_date = "2026-10-08"
+pages_build_output_dir = "dist"
+
+# Datos en vivo de la tienda: productos, fotos nuevas, configuración y pedidos.
+[[kv_namespaces]]
+binding = "DATOS"
+id = "70eeae838dab4c44852e65b2f2ff59f2"

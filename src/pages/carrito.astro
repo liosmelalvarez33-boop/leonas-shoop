@@ -193,10 +193,12 @@ import config from '../data/config.json';
       }
     });
 
+    let enviando = false;
+
     form.addEventListener('submit', (evento) => {
       evento.preventDefault();
       const carrito = getCart();
-      if (carrito.length === 0) return;
+      if (carrito.length === 0 || enviando) return;
 
       const nombre = nombreEl.value.trim();
       const entrega = entregaEl.value.trim();
@@ -212,11 +214,44 @@ import config from '../data/config.json';
       }
 
       guardarCliente();
+      enviando = true;
+
       const mensaje = mensajePedido(carrito, { nombre, entrega, notas: notasEl.value });
+      // WhatsApp se abre en el mismo gesto (para que el navegador no lo bloquee).
       window.open(waLink(mensaje), '_blank', 'noopener');
-      hint.classList.remove('hidden');
-      showToast('Pedido abierto en WhatsApp');
-      hint.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+      // El pedido queda registrado en la nube aunque el chat ya se haya abierto.
+      const items = carrito.map((it) => ({
+        titulo: it.titulo,
+        precio: Math.round(it.precio),
+        cantidad: it.cantidad,
+        talla: it.talla || null,
+        imagen: /^[A-Za-z0-9._-]{1,80}$/.test(it.imagen ?? '') ? it.imagen : null,
+      }));
+      fetch('/api/pedidos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombre, entrega, notas: notasEl.value.trim(), items, total: totalDe(carrito) }),
+      })
+        .then(async (r) => {
+          const d = r.ok ? await r.json() : null;
+          if (d?.numero) {
+            hint.innerHTML = `Tu pedido <strong>#${d.numero}</strong> quedó registrado en la tienda. Responde el chat de WhatsApp para confirmar entrega y pago; puedes vaciar el carrito cuando quieras.`;
+            showToast(`Pedido #${d.numero} registrado`);
+          } else {
+            hint.innerHTML = 'Tu pedido se abrió en WhatsApp, pero no pudo registrarse en la tienda. Al abrir el chat queda igualmente enviado.';
+            showToast('No se pudo registrar el pedido', 'error');
+          }
+        })
+        .catch(() => {
+          hint.innerHTML = 'Tu pedido se abrió en WhatsApp, pero no pudo registrarse en la tienda (sin conexión). Al abrir el chat queda igualmente enviado.';
+          showToast('Sin conexión: pedido enviado igual', 'error');
+        })
+        .finally(() => {
+          enviando = false;
+          hint.classList.remove('hidden');
+          hint.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        });
     });
 
     btnClear.addEventListener('click', () => {

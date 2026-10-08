@@ -1,5 +1,5 @@
 /* Service worker de Leonas Shoop: guarda el catálogo para verlo sin datos. */
-const CACHE = 'leonas-v1';
+const CACHE = 'leonas-v2';
 const PRECACHE = [
   '/',
   '/catalogo',
@@ -28,7 +28,7 @@ const redPrimero = async (peticion) => {
   const cache = await caches.open(CACHE);
   try {
     const res = await fetch(peticion);
-    if (res && res.ok) cache.put(peticion, res.clone());
+    if (res && res.ok) cache.put(peticion, res.clone()).catch(() => {});
     return res;
   } catch {
     const guardado = await cache.match(peticion, { ignoreSearch: true });
@@ -37,14 +37,35 @@ const redPrimero = async (peticion) => {
   }
 };
 
+// APIs de datos: red primero (siempre lo último del panel); sin internet → caché.
+const apiPrimero = async (peticion) => {
+  const cache = await caches.open(CACHE);
+  try {
+    const res = await fetch(peticion);
+    if (res && res.ok) cache.put(peticion, res.clone()).catch(() => {});
+    return res;
+  } catch {
+    const guardado = await cache.match(peticion);
+    if (guardado) return guardado;
+    return new Response(JSON.stringify({ error: 'sin-conexion' }), {
+      status: 503,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+};
+
 // CSS/JS con hash: caché primero (son inmutables).
 const cachéPrimero = async (peticion) => {
   const cache = await caches.open(CACHE);
   const guardado = await cache.match(peticion);
   if (guardado) return guardado;
-  const res = await fetch(peticion);
-  if (res && res.ok) cache.put(peticion, res.clone());
-  return res;
+  try {
+    const res = await fetch(peticion);
+    if (res && res.ok) cache.put(peticion, res.clone()).catch(() => {});
+    return res;
+  } catch {
+    return Response.error();
+  }
 };
 
 // Fotos de productos: rápidas de la caché y se actualizan en segundo plano.
@@ -53,7 +74,7 @@ const actualizaciónDeFondo = async (peticion) => {
   const guardado = await cache.match(peticion);
   const red = fetch(peticion)
     .then((res) => {
-      if (res && res.ok) cache.put(peticion, res.clone());
+      if (res && res.ok) cache.put(peticion, res.clone()).catch(() => {});
       return res;
     })
     .catch(() => undefined);
@@ -64,8 +85,15 @@ self.addEventListener('fetch', (evento) => {
   const url = new URL(evento.request.url);
   if (evento.request.method !== 'GET' || url.origin !== self.location.origin) return;
 
+  // El panel y sus APIs nunca pasan por la caché (sesión y datos siempre frescos).
+  if (url.pathname === '/admin' || url.pathname.startsWith('/admin/') || url.pathname.startsWith('/api/admin/')) return;
+
   if (evento.request.mode === 'navigate') {
     evento.respondWith(redPrimero(evento.request));
+    return;
+  }
+  if (url.pathname === '/api/catalogo' || url.pathname === '/api/config') {
+    evento.respondWith(apiPrimero(evento.request));
     return;
   }
   if (url.pathname.startsWith('/img/') || url.pathname.startsWith('/icons/')) {

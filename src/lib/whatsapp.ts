@@ -2,8 +2,14 @@ import config from '../data/config.json';
 import { formatPrice } from './format';
 import type { CartItem } from './types';
 
-export const WA_NUMBER = config.whatsapp;
-export const SIMBOLO = config.simbolo;
+export let WA_NUMBER = config.whatsapp;
+export let SIMBOLO = config.simbolo;
+
+// El panel puede cambiar el número o el símbolo; la web los actualiza al cargar.
+export function fijarConfigViva(cfg: { whatsapp: string; simbolo: string }): void {
+  if (cfg.whatsapp) WA_NUMBER = cfg.whatsapp;
+  if (cfg.simbolo) SIMBOLO = cfg.simbolo;
+}
 
 export function waLink(texto: string): string {
   return `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(texto)}`;

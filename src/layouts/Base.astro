@@ -122,5 +122,19 @@ const ogImage = new URL(image ?? '/img/og-cover.png', Astro.site);
         });
       }
     </script>
+
+    <script>
+      // Datos en vivo: WhatsApp, horario, categorías y destacados desde la nube.
+      import { hidratar, alCambiarConfig } from '../lib/vivo';
+      import { fijarConfigViva } from '../lib/whatsapp';
+
+      alCambiarConfig(fijarConfigViva);
+      const arrancar = () => hidratar().catch(() => {});
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', arrancar, { once: true });
+      } else {
+        arrancar();
+      }
+    </script>
   </body>
 </html>

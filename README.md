@@ -4,12 +4,15 @@ Tienda online de artículos de primera y segunda mano (ropa, zapatos y más).
 Los clientes arman su pedido en la web y lo envían **directo a WhatsApp** — sin registros
 ni pasarelas de pago.
 
-- **Stack:** Astro (sitio 100% estático) + Tailwind CSS
+- **Stack:** Astro (sitio 100% estático) + Cloudflare Functions
 - **Carrito:** guardado en el navegador (`localStorage`), sin servidor
-- **Pedidos:** mensaje armado hacia `wa.me/5354704764`
+- **Pedidos:** se registran en la nube (con estados: pendiente → confirmado → entregado)
+  y el mensaje va directo a `wa.me/5354704764`
+- **Panel en la nube:** <https://leonas-shoop.pages.dev/admin> — se gestiona desde el
+  celular, sin prender la PC; los cambios se ven al instante
 - **Modo oscuro:** botón ☀/🌙 en el encabezado; respeta la preferencia del visitante y la recuerda
 - **Marca:** logo en `public/img/logo.svg` (cambiarlo por el definitivo junto a `public/favicon.svg`)
-- **Hosting:** Cloudflare Pages (gratis, uso comercial permitido)
+- **Hosting:** Cloudflare Pages (gratis, uso comercial permitido) + KV para los datos
 
 ---
 
@@ -18,13 +21,16 @@ ni pasarelas de pago.
 ```bash
 npm install          # instalar dependencias (solo la primera vez)
 npm run dev          # desarrollo en http://localhost:4321
-npm run panel        # panel de administración en http://localhost:4399
 npm run build        # generar el sitio en dist/
 npm run preview      # ver dist/ en local
+node scripts/seed.mjs --ui   # subir la interfaz del panel a la nube (tras editar admin.html)
 npm run placeholders # regenerar fotos de ejemplo (no borra las tuyas)
 npm run icons        # regenerar los íconos de la app (PWA)
 npx astro check      # revisar tipos/errores
 ```
+
+El panel **no** se ejecuta en local: vive en la nube (`/admin`) y habla con las
+Functions + KV de Cloudflare.
 
 ---
 
@@ -32,17 +38,26 @@ npx astro check      # revisar tipos/errores
 
 ### Desde el panel (recomendado)
 
-1. En una terminal: `npm run panel` y abre **http://localhost:4399**.
-2. Pulsa **＋ Nuevo producto**, rellena título, precio, tallas, etc.
+1. Abre **<https://leonas-shoop.pages.dev/admin>** desde el celular o la PC
+   (también desde el acceso directo de la PWA) y entra con la contraseña
+   guardada en `~/.config/leonas-shoop/admin.pass`.
+2. Pestaña **Productos** → **＋ Nuevo producto**: rellena título, precio, tallas, etc.
    (el ID de la URL se genera solo del título; arrastra las fotos y se reducen solas a 1200 px en WebP).
-3. **Guardar** lo deja listo en el catálogo.
-4. **🚀 Publicar cambios** compila el sitio y lo sube a la web (tarda ~30-60 segundos
-   y ves el log en pantalla; al terminar te da el enlace).
+3. **Guardar** → el producto aparece en la web **al instante** (no hay que publicar nada).
 
-Con el panel también puedes **Editar** (lápiz) y **Eliminar** cualquier producto, y
-buscar o filtrar por categoría.
+Con el panel también puedes **Editar** y **Eliminar** cualquier producto, buscar o
+filtrar por categoría, y en la pestaña **Pedidos** ver los pedidos entrantes y
+cambiarles el estado (pendiente → confirmado → entregado / cancelado).
+
+Los datos viven en **Cloudflare KV** (respaldo: `src/data/*.json` en el repo; si la KV
+estuviera vacía, la web usa ese respaldo automática y el panel se rellena con
+`node scripts/seed.mjs`).
 
 ### A mano (opcional)
+
+> Lo normal es editar desde el panel. Si tocas `src/data/products.json` a mano,
+> aplica los cambios en la nube con `node scripts/seed.mjs --forzar` (reemplaza la
+> KV por el JSON del repo) y publica el sitio para que también cambie el primer pintado.
 
 1. Abre **`src/data/products.json`**.
 2. Copia un bloque existente y pégalo al final (antes del corchete de cierre `]`).
@@ -96,7 +111,11 @@ Borra las fotos de ejemplo que quieras reemplazar (`public/img/productos/*.svg`)
 
 ### Cambiar datos de la tienda
 
-Todo está en **`src/data/config.json`**:
+**Desde el panel** (recomendado): pestaña **⚙️ Tienda** → nombre, WhatsApp, horario,
+entregas, pagos, ubicación, redes y categorías (añadir/borrar) → **Guardar**. Se ve
+al instante en toda la web.
+
+De respaldo, lo mismo está en **`src/data/config.json`**:
 
 - `whatsapp` → número con código de país, solo dígitos (ej. `5354704764`)
 - `whatsappVisible` → cómo se muestra (ej. `+53 54704764`)
@@ -116,13 +135,13 @@ La tienda se puede **instalar como app** en el celular y la PC, y ver el catálo
 - **PC (Chrome/Edge):** botón **📲 Instalar** del encabezado.
 
 **Funciona sin datos:** el service worker (`public/sw.js`) guarda el catálogo y las fotos;
-el pedido por WhatsApp se envía cuando haya conexión. Al publicar cambios desde el panel,
-la web siempre muestra lo último (las páginas se cargan de la red primero).
+los cambios del panel se ven al instante (las páginas y los datos van primero por la red).
+Si cambias el nombre de la caché en `sw.js` (`leonas-v2` → `v3`), los
+usuarios descargan la versión nueva automáticamente.
 
 Archivos: `public/manifest.webmanifest` (qué app es), `public/icons/` (íconos, se
 regeneran con `npm run icons` desde `public/img/logo.svg`) y `public/sw.js` (caché
-offline). Si cambias el nombre de la caché en `sw.js` (`leonas-v1` → `v2`), los
-usuarios descargan la versión nueva automáticamente.
+offline).
 
 ### APK para Android (app «de verdad»)
 
@@ -155,10 +174,8 @@ conexión lenta. Requiere `JAVA_HOME` y `ANDROID_HOME` como los define el script
 
 ## Publicar en Cloudflare Pages (gratis)
 
-**Forma fácil:** el botón **🚀 Publicar cambios** del panel (`npm run panel`) hace todo:
-compila y sube el sitio a `https://leonas-shoop.pages.dev`.
-
-**Desde la terminal** (equivale al botón):
+Los cambios del **panel** no necesitan publicación: se guardan en KV y se ven al
+instante. Publicar solo hace falta cuando cambia el **código** del sitio:
 
 ```bash
 npm run build
@@ -181,9 +198,9 @@ Si te dice que falló la resolución de DNS, antepón
 
 ### Después de cada publicación
 
-- Edita productos desde el panel → **Publicar cambios**. No hace falta Git ni tocar la terminal.
-- Si prefieres Git: `git add . && git commit -m "Nuevos productos" && git push` con una
-  integración de Cloudflare a GitHub, reconstruye y publica solo (setup distinto).
+- Editar productos, fotos, datos de la tienda o pedidos → desde el panel, **al instante**.
+- Cambios de código/interfaz → `npm run build` + deploy (arriba). Si editaste
+  `scripts/admin.html`, además `node scripts/seed.mjs --ui`.
 
 ### Dominio propio (opcional, después)
 
@@ -196,7 +213,8 @@ proyecto Pages. Actualiza `site` en `config.json`.
 
 1. Cliente elige talla y cantidad → **Añadir al carrito**.
 2. En **/carrito** escribe nombre y lugar de entrega → **Enviar pedido por WhatsApp**.
-3. Se abre WhatsApp con el mensaje ya armado:
+3. El pedido queda **registrado en la tienda** (aparece en el panel con el número
+   `#N` y estado *pendiente*) **y** se abre WhatsApp con el mensaje ya armado:
    ```
    Hola Leonas Shoop! Quiero hacer un pedido:
 
@@ -208,7 +226,8 @@ proyecto Pages. Actualiza `site` en `config.json`.
    Entrega: Vedado, La Habana
    ```
 4. Ustedes confirman disponibilidad y coordinan pago (Transfermóvil, EnZona o efectivo)
-   y entrega en el chat.
+   y entrega en el chat, y van marcando el pedido en el panel: **confirmado**,
+   **entregado** o **cancelado**.
 
 También hay un **botón flotante verde** en todas las páginas para consultas generales,
 y un botón **"Pedir por WhatsApp"** en cada ficha de producto.
@@ -221,18 +240,22 @@ y un botón **"Pedir por WhatsApp"** en cada ficha de producto.
 leonas-shoop/
 ├── src/
 │   ├── data/
-│   │   ├── config.json        ← datos de la tienda (WhatsApp, horario, categorías)
-│   │   └── products.json      ← EL CATÁLOGO (lo edita usted)
+│   │   ├── config.json        ← respaldo de la tienda (WhatsApp, horario, categorías)
+│   │   └── products.json      ← respaldo del catálogo
 │   ├── pages/
 │   │   ├── index.astro        ← inicio
-│   │   ├── catalogo.astro     ← catálogo + filtros
-│   │   ├── categoria/[slug].astro
-│   │   ├── producto/[id].astro
-│   │   ├── carrito.astro
+│   │   ├── catalogo.astro     ← catálogo + filtros + ficha en diálogo (?p=)
+│   │   ├── carrito.astro      ← registro el pedido y abre WhatsApp
 │   │   └── contacto.astro
 │   ├── components/            ← Header, Footer, tarjetas, botón flotante
-│   ├── lib/                   ← carrito, mensajes de WhatsApp, catálogo
+│   ├── lib/                   ← carrito, WhatsApp, datos en vivo (vivo.ts, detalle.ts)
 │   └── layouts/Base.astro
+├── functions/                 ← Cloudflare Functions (API del panel y de la web)
+│   ├── _lib.js                ← datos KV, sesión, validaciones, rate limit
+│   ├── api/                   ← /api/catalogo, /api/pedidos, /api/admin/*
+│   ├── admin/index.js         ← /admin (login + panel desde KV)
+│   ├── producto/[id].js       ← 302 → /catalogo?p=
+│   └── categoria/[slug].js    ← 302 → /catalogo?categoria=
 ├── public/
 │   ├── img/productos/         ← fotos de los artículos
 │   ├── icons/                 ← íconos de la app (npm run icons)
@@ -244,8 +267,8 @@ leonas-shoop/
 │   ├── twa-manifest.json      ← configuración del APK
 │   └── android/               ← proyecto Android (regenerable, no versionado)
 └── scripts/
-    ├── panel.mjs              ← servidor del panel (npm run panel)
-    ├── panel.html             ← interfaz del panel (http://localhost:4399)
+    ├── admin.html             ← interfaz del panel (se sube a KV: seed.mjs --ui)
+    ├── seed.mjs               ← siembra la KV (datos + panel)
     ├── build-apk.sh           ← regenera y firma el APK
     ├── gen-icons.mjs          ← íconos de la app (npm run icons)
     └── gen-placeholders.mjs
@@ -254,4 +277,4 @@ leonas-shoop/
 ## Próximas ideas (no incluidas aún)
 
 - Página "Cómo pagar" con los QR de Transfermóvil y EnZona.
-- Estados de pedido guardados (pendiente → confirmado → entregado).
+- Aviso push al celular del vendedor cuando entra un pedido nuevo.

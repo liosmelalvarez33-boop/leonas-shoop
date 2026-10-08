@@ -8,8 +8,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "placeholders": "node scripts/gen-placeholders.mjs",
-    "icons": "node scripts/gen-icons.mjs",
-    "panel": "node scripts/panel.mjs"
+    "icons": "node scripts/gen-icons.mjs"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.4",

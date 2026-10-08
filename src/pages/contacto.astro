@@ -11,7 +11,7 @@ const etiquetasRedes: Record<string, string> = {
   tiktok: 'TikTok',
 };
 
-const faqs = [
+const faqs: Array<{ q: string; a: string; clave?: string }> = [
   {
     q: '¿Cómo hago un pedido?',
     a: 'Añade los artículos al carrito, pulsa "Enviar pedido por WhatsApp" y te abrimos el chat con el pedido ya escrito. Confirmamos disponibilidad y coordinamos la entrega.',
@@ -19,10 +19,12 @@ const faqs = [
   {
     q: '¿Cómo puedo pagar?',
     a: config.pagos,
+    clave: 'pagos',
   },
   {
     q: '¿Hacen envíos?',
     a: config.entregas,
+    clave: 'entregas',
   },
   {
     q: '¿Los artículos de segunda mano están en buen estado?',
@@ -49,8 +51,8 @@ const jsonLd = {
     <div class="mt-8 grid gap-6 md:grid-cols-2">
       <div class="card p-6">
         <h2 class="text-lg font-bold text-fg">WhatsApp</h2>
-        <p class="mt-1 text-2xl font-extrabold text-fg">{config.whatsappVisible}</p>
-        <p class="mt-2 text-sm text-fg-subtle">{config.horario}</p>
+        <p class="mt-1 text-2xl font-extrabold text-fg" data-cfg="whatsappVisible">{config.whatsappVisible}</p>
+        <p class="mt-2 text-sm text-fg-subtle" data-cfg="horario">{config.horario}</p>
         <a
           href={waGeneral}
           target="_blank"
@@ -78,10 +80,10 @@ const jsonLd = {
       <div class="card p-6">
         <h2 class="text-lg font-bold text-fg">Entregas y pagos</h2>
         <ul class="mt-3 space-y-3 text-sm text-fg-muted">
-          <li><strong class="text-fg">Entregas:</strong> {config.entregas}</li>
-          <li><strong class="text-fg">Pagos:</strong> {config.pagos}</li>
-          <li><strong class="text-fg">Horario:</strong> {config.horario}</li>
-          <li><strong class="text-fg">Ubicación:</strong> {config.ubicacion}</li>
+          <li><strong class="text-fg">Entregas:</strong> <span data-cfg="entregas">{config.entregas}</span></li>
+          <li><strong class="text-fg">Pagos:</strong> <span data-cfg="pagos">{config.pagos}</span></li>
+          <li><strong class="text-fg">Horario:</strong> <span data-cfg="horario">{config.horario}</span></li>
+          <li><strong class="text-fg">Ubicación:</strong> <span data-cfg="ubicacion">{config.ubicacion}</span></li>
         </ul>
       </div>
     </div>
@@ -95,7 +97,7 @@ const jsonLd = {
               <summary class="cursor-pointer font-bold text-fg marker:content-none">
                 {faq.q}
               </summary>
-              <p class="mt-3 text-sm leading-relaxed text-fg-muted">{faq.a}</p>
+              <p class="mt-3 text-sm leading-relaxed text-fg-muted" data-cfg={faq.clave}>{faq.a}</p>
             </details>
           ))
         }

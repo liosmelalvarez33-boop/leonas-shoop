@@ -3,6 +3,7 @@ import Base from '../layouts/Base.astro';
 import ProductCard from '../components/ProductCard.astro';
 import CtaBanner from '../components/CtaBanner.astro';
 import { categorias, productos, todasLasTallas } from '../lib/catalogo';
+import configJson from '../data/config.json';
 
 const tallas = todasLasTallas();
 
@@ -11,13 +12,10 @@ const jsonLd = {
   '@type': 'CollectionPage',
   name: 'Catálogo completo',
   isPartOf: { '@type': 'WebSite', name: 'Leonas Shoop' },
-  hasPart: productos.map((p) => ({
-    '@type': 'Product',
-    name: p.titulo,
-    url: `/producto/${p.id}`,
-    offers: { '@type': 'Offer', price: p.precio, priceCurrency: 'CUP' },
-  })),
 };
+
+// Copia de respaldo incrustada: si no hay conexión, el catálogo igual funciona.
+const datosBase = JSON.stringify({ productos, config: configJson }).replace(/</g, '\\u003c');
 ---
 
 <Base
@@ -73,7 +71,8 @@ const jsonLd = {
           </select>
         </div>
         <div>
-          <label for="f-orden" class="mb-1 block text-xs font-semibold text-fg-subtle">Ordenar</label>
+          <label for="f-orden" class="mb-1 block text-xs font-semibold text-fg-subtle">Ordenar</label
+          >
           <select id="f-orden" class="input">
             <option value="relevancia">Recomendados</option>
             <option value="precio-asc">Precio: menor a mayor</option>
@@ -84,7 +83,12 @@ const jsonLd = {
       </div>
 
       <div class="mt-4 flex flex-wrap items-center gap-3">
-        <div class="flex flex-wrap items-center gap-2" role="group" aria-label="Filtrar por talla">
+        <div
+          id="chips-talla"
+          class="flex flex-wrap items-center gap-2"
+          role="group"
+          aria-label="Filtrar por talla"
+        >
           <span class="text-xs font-semibold text-fg-subtle">Talla:</span>
           <button type="button" class="chip is-active" data-talla="">Todas</button>
           {
@@ -132,7 +136,48 @@ const jsonLd = {
 
   <CtaBanner />
 
+  <script type="application/json" id="datos-base" set:html={datosBase} />
+
+  <dialog id="detalle" aria-label="Detalle del producto">
+    <div class="detalle-caja">
+      <div class="detalle-barra">
+        <a href="/catalogo" class="detalle-volver" id="detalle-volver">← Volver al catálogo</a>
+        <button type="button" class="detalle-cerrar" id="detalle-cerrar" aria-label="Cerrar">✕</button>
+      </div>
+      <div class="detalle-cuerpo" id="detalle-cuerpo"></div>
+    </div>
+  </dialog>
+
+  <style is:global>
+    #detalle {
+      border: none; border-radius: 18px; padding: 0;
+      width: min(980px, calc(100vw - 24px)); max-height: calc(100vh - 28px);
+      box-shadow: 0 30px 70px rgba(0, 0, 0, 0.35); background: var(--panel, #fff); color: var(--fg, #1c1917);
+    }
+    #detalle::backdrop { background: rgba(28, 25, 23, 0.55); backdrop-filter: blur(3px); }
+    .detalle-caja { display: flex; flex-direction: column; max-height: calc(100vh - 28px); }
+    .detalle-barra {
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      padding: 10px 16px; border-bottom: 1px solid var(--line, #e7e5e4); position: sticky; top: 0;
+      background: var(--panel, #fff); border-radius: 18px 18px 0 0; z-index: 2;
+    }
+    .detalle-volver { font-size: 14px; font-weight: 700; color: var(--accent, #d97706); text-decoration: none; }
+    .detalle-cerrar {
+      width: 34px; height: 34px; border-radius: 999px; border: 1px solid var(--line, #e7e5e4);
+      background: var(--panel, #fff); color: var(--fg, #1c1917); font-size: 15px; cursor: pointer;
+    }
+    .detalle-cerrar:hover { border-color: var(--accent, #d97706); color: var(--accent, #d97706); }
+    .detalle-cuerpo { overflow-y: auto; padding: 18px 20px 26px; }
+    @media (max-width: 640px) { .detalle-cuerpo { padding: 14px 14px 22px; } }
+  </style>
+
   <script>
+    import { traerCatalogo, tarjetaProducto } from '../lib/vivo';
+    import type { ConfigViva } from '../lib/vivo';
+    import type { Producto } from '../lib/types';
+    import { detalleHTML, montarDetalle } from '../lib/detalle';
+    import { showToast } from '../scripts/toast';
+
     const grid = document.getElementById('grid') as HTMLDivElement;
     const vacio = document.getElementById('vacio') as HTMLDivElement;
     const conteo = document.getElementById('conteo') as HTMLElement;
@@ -142,10 +187,57 @@ const jsonLd = {
     const selOrden = document.getElementById('f-orden') as HTMLSelectElement;
     const chkDisponibles = document.getElementById('f-solo-disponibles') as HTMLInputElement;
     const btnLimpiar = document.getElementById('f-limpiar') as HTMLButtonElement;
-    const chipsTalla = [...document.querySelectorAll<HTMLButtonElement>('[data-talla]')];
+    const chipsTalla = document.getElementById('chips-talla') as HTMLDivElement;
+    const dlg = document.getElementById('detalle') as HTMLDialogElement;
+    const dlgCuerpo = document.getElementById('detalle-cuerpo') as HTMLDivElement;
+    const tituloBase = document.title;
 
-    const items = [...grid.children] as HTMLDivElement[];
+    const base = JSON.parse(
+      (document.getElementById('datos-base') as HTMLScriptElement).textContent || '{"productos":[],"config":{}}',
+    ) as { productos: Producto[]; config: ConfigViva };
+    let datos = base;
+    let items: HTMLDivElement[] = [];
     let tallaActiva = '';
+
+    const TITULO_BASE = tituloBase;
+
+    function envolver(p: Producto, i: number): string {
+      const buscarTxt = `${p.titulo} ${p.descripcion}`.toLowerCase();
+      return `<div class="flex" data-pos="${i}" data-categoria="${p.categoria}" data-condicion="${p.condicion}" data-estado="${p.estado}" data-precio="${p.precio}" data-tallas="${(p.tallas || []).join(' ')}" data-buscar="${buscarTxt.replace(/"/g, '&quot;')}">${tarjetaProducto(p, datos.config)}</div>`;
+    }
+
+    function pintarGrid() {
+      grid.innerHTML = datos.productos.map(envolver).join('');
+      items = [...grid.children] as HTMLDivElement[];
+      const total = datos.productos.length;
+      grid.dataset.total = String(total);
+      aplicar();
+    }
+
+    function pintarCategorias() {
+      const valorActual = selCategoria.value;
+      const slugs = [...selCategoria.options].map((o) => o.value);
+      const vivos = ['', ...datos.config.categorias.map((c) => c.slug)];
+      if (slugs.length === vivos.length && slugs.every((s, i) => s === vivos[i])) return;
+      selCategoria.innerHTML =
+        '<option value="">Todas</option>' +
+        datos.config.categorias.map((c) => `<option value="${c.slug}">${c.nombre}</option>`).join('');
+      selCategoria.value = valorActual;
+    }
+
+    function pintarTallas() {
+      const set = new Set<string>();
+      for (const p of datos.productos) for (const t of p.tallas || []) set.add(t);
+      const vivas = [...set].sort((a, b) => Number(a) - Number(b) || a.localeCompare(b));
+      const actuales = [...chipsTalla.querySelectorAll('[data-talla]')].map((b) => b.getAttribute('data-talla'));
+      const mismoOrden = vivas.length + 1 === actuales.length && vivas.every((t, i) => actuales[i + 1] === t);
+      if (mismoOrden) return;
+      chipsTalla.innerHTML =
+        '<span class="text-xs font-semibold text-fg-subtle">Talla:</span>' +
+        '<button type="button" class="chip' + (tallaActiva === '' ? ' is-active' : '') + '" data-talla="">Todas</button>' +
+        vivas.map((t) => `<button type="button" class="chip${tallaActiva === t ? ' is-active' : ''}" data-talla="${t}">${t}</button>`).join('');
+      vincularChips();
+    }
 
     function aplicar() {
       const texto = buscar.value.trim().toLowerCase();
@@ -181,6 +273,76 @@ const jsonLd = {
       grid.classList.toggle('hidden', visibles === 0);
     }
 
+    function vincularChips() {
+      for (const chip of chipsTalla.querySelectorAll<HTMLButtonElement>('[data-talla]')) {
+        chip.addEventListener('click', () => {
+          chipsTalla.querySelectorAll('[data-talla]').forEach((c) => c.classList.remove('is-active'));
+          chip.classList.add('is-active');
+          tallaActiva = chip.dataset.talla ?? '';
+          aplicar();
+        });
+      }
+    }
+
+    // ---------- Detalle (?p=<id>) ----------
+    function abrirDetalle(id: string, push = true) {
+      const p = datos.productos.find((x) => x.id === id);
+      if (!p) return;
+      dlgCuerpo.innerHTML = detalleHTML(p, datos.config);
+      const raiz = dlgCuerpo.firstElementChild as HTMLElement;
+      montarDetalle(raiz, p, showToast);
+      if (!dlg.open) dlg.showModal();
+      document.title = `${p.titulo} | Leonas Shoop`;
+      if (push) {
+        const url = new URL(location.href);
+        url.searchParams.set('p', id);
+        history.pushState({ p: id }, '', url);
+      }
+    }
+
+    function cerrarDetalle(push = true) {
+      if (dlg.open) dlg.close();
+      document.title = TITULO_BASE;
+      if (push && new URL(location.href).searchParams.has('p')) {
+        const url = new URL(location.href);
+        url.searchParams.delete('p');
+        history.pushState({}, '', url);
+      }
+    }
+
+    function sincronizarUrl() {
+      const p = new URLSearchParams(location.search).get('p');
+      if (p) abrirDetalle(p, false);
+      else cerrarDetalle(false);
+    }
+
+    dlg.addEventListener('close', () => {
+      document.title = TITULO_BASE;
+      if (new URL(location.href).searchParams.has('p')) {
+        const url = new URL(location.href);
+        url.searchParams.delete('p');
+        history.replaceState({}, '', url);
+      }
+    });
+    (document.getElementById('detalle-cerrar') as HTMLButtonElement).addEventListener('click', () => dlg.close());
+    (document.getElementById('detalle-volver') as HTMLAnchorElement).addEventListener('click', (e) => {
+      e.preventDefault();
+      dlg.close();
+    });
+    dlg.addEventListener('click', (e) => {
+      if (e.target === dlg) dlg.close();
+    });
+    window.addEventListener('popstate', sincronizarUrl);
+
+    grid.addEventListener('click', (e) => {
+      const a = (e.target as HTMLElement).closest<HTMLAnchorElement>('a[href*="?p="]');
+      if (!a) return;
+      e.preventDefault();
+      const id = new URL(a.href).searchParams.get('p');
+      if (id) abrirDetalle(id);
+    });
+
+    // ---------- Filtros ----------
     const params = new URLSearchParams(window.location.search);
     if (params.get('categoria')) selCategoria.value = params.get('categoria') ?? '';
     if (params.get('condicion')) selCondicion.value = params.get('condicion') ?? '';
@@ -192,15 +354,6 @@ const jsonLd = {
     selOrden.addEventListener('change', aplicar);
     chkDisponibles.addEventListener('change', aplicar);
 
-    for (const chip of chipsTalla) {
-      chip.addEventListener('click', () => {
-        chipsTalla.forEach((c) => c.classList.remove('is-active'));
-        chip.classList.add('is-active');
-        tallaActiva = chip.dataset.talla ?? '';
-        aplicar();
-      });
-    }
-
     btnLimpiar.addEventListener('click', () => {
       buscar.value = '';
       selCategoria.value = '';
@@ -208,10 +361,25 @@ const jsonLd = {
       selOrden.value = 'relevancia';
       chkDisponibles.checked = false;
       tallaActiva = '';
-      chipsTalla.forEach((c) => c.classList.toggle('is-active', c.dataset.talla === ''));
+      chipsTalla.querySelectorAll('[data-talla]').forEach((c) => c.classList.toggle('is-active', c.getAttribute('data-talla') === ''));
       aplicar();
     });
 
-    aplicar();
+    vincularChips();
+    pintarGrid();
+
+    // Datos en vivo: reemplaza la rejilla con lo último del panel.
+    traerCatalogo()
+      .then((vivo) => {
+        datos = vivo;
+        pintarCategorias();
+        pintarTallas();
+        pintarGrid();
+        sincronizarUrl();
+      })
+      .catch(() => {
+        // Sin conexión: queda la copia incrustada en la página.
+        sincronizarUrl();
+      });
   </script>
 </Base>
