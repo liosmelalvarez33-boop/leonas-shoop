@@ -124,6 +124,33 @@ regeneran con `npm run icons` desde `public/img/logo.svg`) y `public/sw.js` (cac
 offline). Si cambias el nombre de la caché en `sw.js` (`leonas-v1` → `v2`), los
 usuarios descargan la versión nueva automáticamente.
 
+### APK para Android (app «de verdad»)
+
+Además de la PWA, hay un **APK** descargable e instalable, ideal para compartirlo
+por WhatsApp:
+
+- **Descarga:** <https://leonas-shoop.pages.dev/apps/leonas-shoop.apk>
+- **Instalar en el celular:** abrir el link → «Descargar» → abrir el archivo →
+  Android pedirá permitir **«Instalar apps de origen desconocido»** para el
+  navegador → aceptar y **Instalar**. El ícono de la leona aparece en el menú.
+- El APK es una «cáscara» que abre la web: **los precios y productos se actualizan
+  solos** sin volver a instalar nada.
+
+Detalles técnicos: paquete `com.leonasshoop.app`, generado con Bubblewrap (TWA),
+firmado con la clave `~/.keys/leonas-shoop.keystore` (¡guardar esa clave y su
+contraseña para siempre: si se pierde, no se puede actualizar la app instalada!).
+`public/.well-known/assetlinks.json` permite que Chrome abra la web a pantalla
+completa dentro del APK.
+
+Para regenerar el APK (solo si cambia el nombre, los íconos o la URL):
+
+```bash
+bash scripts/build-apk.sh   # genera, compila y firma → public/apps/leonas-shoop.apk
+```
+
+(La primera vez descarga Gradle y dependencias de Android: ~20-40 minutos con
+conexión lenta. Requiere `JAVA_HOME` y `ANDROID_HOME` como los define el script.)
+
 ---
 
 ## Publicar en Cloudflare Pages (gratis)
@@ -206,10 +233,21 @@ leonas-shoop/
 │   ├── components/            ← Header, Footer, tarjetas, botón flotante
 │   ├── lib/                   ← carrito, mensajes de WhatsApp, catálogo
 │   └── layouts/Base.astro
-├── public/img/productos/      ← fotos de los artículos
+├── public/
+│   ├── img/productos/         ← fotos de los artículos
+│   ├── icons/                 ← íconos de la app (npm run icons)
+│   ├── manifest.webmanifest   ← manifiesto de la PWA
+│   ├── sw.js                  ← service worker (catálogo offline)
+│   ├── apps/leonas-shoop.apk  ← app para Android
+│   └── .well-known/assetlinks.json ← firma para pantalla completa en el APK
+├── apk/
+│   ├── twa-manifest.json      ← configuración del APK
+│   └── android/               ← proyecto Android (regenerable, no versionado)
 └── scripts/
     ├── panel.mjs              ← servidor del panel (npm run panel)
     ├── panel.html             ← interfaz del panel (http://localhost:4399)
+    ├── build-apk.sh           ← regenera y firma el APK
+    ├── gen-icons.mjs          ← íconos de la app (npm run icons)
     └── gen-placeholders.mjs
 ```
 

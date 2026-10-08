@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.leonasshoop.app",
+      "sha256_cert_fingerprints": [
+        "35:09:90:C9:89:E6:8D:63:09:FE:CB:F7:1F:96:8A:66:0F:0C:8C:C5:44:64:18:E2:45:5E:A5:90:3E:D7:0F:C9"
+      ]
+    }
+  }
+]
