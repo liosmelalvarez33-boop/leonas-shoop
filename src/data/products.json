@@ -6,9 +6,13 @@
     "precio": 1800,
     "condicion": "nuevo",
     "estado": "disponible",
-    "tallas": ["S", "M", "L"],
+    "tallas": [
+      "S",
+      "M",
+      "L"
+    ],
     "descripcion": "Camisa de algodón con estampado floral, tejido ligero y fresco. Perfecta para el día a día. Nueva, con etiqueta.",
-    "imagenes": ["camisa-floral.svg"],
+    "imagenes": [],
     "destacado": true
   },
   {
@@ -18,9 +22,14 @@
     "precio": 2500,
     "condicion": "segundo-uso",
     "estado": "disponible",
-    "tallas": ["28", "30", "32", "34"],
+    "tallas": [
+      "28",
+      "30",
+      "32",
+      "34"
+    ],
     "descripcion": "Jeans azul de corte clásico en muy buen estado, sin rotos ni manchas. Segunda mano cuidada, talla real.",
-    "imagenes": ["jean-clasico.svg"],
+    "imagenes": [],
     "destacado": false
   },
   {
@@ -30,9 +39,12 @@
     "precio": 3200,
     "condicion": "segundo-uso",
     "estado": "disponible",
-    "tallas": ["S", "M"],
+    "tallas": [
+      "S",
+      "M"
+    ],
     "descripcion": "Vestido rojo para ocasiones especiales, usado pocas veces. Tejido en excelente estado, sin desgastes.",
-    "imagenes": ["vestido-rojo.svg"],
+    "imagenes": [],
     "destacado": true
   },
   {
@@ -42,9 +54,13 @@
     "precio": 2100,
     "condicion": "nuevo",
     "estado": "disponible",
-    "tallas": ["S", "M", "L"],
+    "tallas": [
+      "S",
+      "M",
+      "L"
+    ],
     "descripcion": "Blusa beige con caída elegante, estilo oficina o salida. Nueva, sin usar.",
-    "imagenes": ["blusa-seda.svg"],
+    "imagenes": [],
     "destacado": false
   },
   {
@@ -54,9 +70,12 @@
     "precio": 2800,
     "condicion": "segundo-uso",
     "estado": "disponible",
-    "tallas": ["M", "L"],
+    "tallas": [
+      "M",
+      "L"
+    ],
     "descripcion": "Chaqueta de mezclilla azul clásica, segunda mano en buen estado general. Ideal para el aire acondicionado o las noches.",
-    "imagenes": ["chaqueta-jean.svg"],
+    "imagenes": [],
     "destacado": false
   },
   {
@@ -66,9 +85,13 @@
     "precio": 1200,
     "condicion": "nuevo",
     "estado": "vendido",
-    "tallas": ["M", "L", "XL"],
+    "tallas": [
+      "M",
+      "L",
+      "XL"
+    ],
     "descripcion": "Polo deportivo transpirable. Nueva con etiqueta. ¡Ya vendido! Escríbenos por si llega otra talla.",
-    "imagenes": ["polo-deportivo.svg"],
+    "imagenes": [],
     "destacado": false
   },
   {
@@ -78,9 +101,15 @@
     "precio": 4200,
     "condicion": "nuevo",
     "estado": "disponible",
-    "tallas": ["36", "37", "38", "39", "40"],
+    "tallas": [
+      "36",
+      "37",
+      "38",
+      "39",
+      "40"
+    ],
     "descripcion": "Zapatos de tacón negros, clásicos y versátiles. Nuevos, con caja. Tacos cómodos de 7 cm.",
-    "imagenes": ["zapatos-tacon.svg"],
+    "imagenes": [],
     "destacado": true
   },
   {
@@ -90,9 +119,16 @@
     "precio": 3800,
     "condicion": "segundo-uso",
     "estado": "disponible",
-    "tallas": ["38", "39", "40", "41", "42", "43"],
+    "tallas": [
+      "38",
+      "39",
+      "40",
+      "41",
+      "42",
+      "43"
+    ],
     "descripcion": "Tenis blancos en muy buen estado, suela sin desgaste. Segunda mano, limpios y listos para usar.",
-    "imagenes": ["tenis-blancos.svg"],
+    "imagenes": [],
     "destacado": false
   },
   {
@@ -102,9 +138,16 @@
     "precio": 1500,
     "condicion": "nuevo",
     "estado": "disponible",
-    "tallas": ["36", "37", "38", "39", "40", "41"],
+    "tallas": [
+      "36",
+      "37",
+      "38",
+      "39",
+      "40",
+      "41"
+    ],
     "descripcion": "Sandalias cómodas para la playa o el hogar. Nuevas, disponibles en varios colores.",
-    "imagenes": ["sandalias-playa.svg"],
+    "imagenes": [],
     "destacado": false
   },
   {
@@ -116,7 +159,7 @@
     "estado": "disponible",
     "tallas": [],
     "descripcion": "Bolso de cuero color vino, con correa ajustable y cierre seguro. Segunda mano, solo una pieza disponible.",
-    "imagenes": ["bolso-cuero.svg"],
+    "imagenes": [],
     "destacado": true
   },
   {
@@ -128,7 +171,7 @@
     "estado": "reservado",
     "tallas": [],
     "descripcion": "Reloj con correa metálica dorada, funcionando perfecto. Reservado para un cliente; escríbenos para lista de espera.",
-    "imagenes": ["reloj-classic.svg"],
+    "imagenes": [],
     "destacado": false
   },
   {
@@ -140,7 +183,7 @@
     "estado": "disponible",
     "tallas": [],
     "descripcion": "Mochila resistente con varios compartimentos, ideal para la escuela o el trabajo. Nueva.",
-    "imagenes": ["mochila-escolar.svg"],
+    "imagenes": [],
     "destacado": false
   },
   {
@@ -152,7 +195,7 @@
     "estado": "disponible",
     "tallas": [],
     "descripcion": "Juego de cortinas de lino natural, luz suave y caída elegante. Nuevas, en paquete.",
-    "imagenes": ["cortinas-lino.svg"],
+    "imagenes": [],
     "destacado": false
   },
   {
@@ -164,7 +207,7 @@
     "estado": "disponible",
     "tallas": [],
     "descripcion": "Tablero de ajedrez de madera con piezas completas. Segunda mano, todo en su lugar. Un clásico para regalar.",
-    "imagenes": ["tablero-ajedrez.svg"],
+    "imagenes": [],
     "destacado": false
   }
 ]

@@ -89,7 +89,7 @@ test.describe('Tienda Leonas Shoop', () => {
     await page.evaluate(() => {
       localStorage.setItem(
         'leonas_shoop_cart_v1',
-        JSON.stringify([{ id: 'camisa-floral', titulo: 'Camisa floral', precio: 1800, talla: 'M', cantidad: 1, imagen: 'camisa-floral.svg' }])
+        JSON.stringify([{ id: 'camisa-floral', titulo: 'Camisa floral', precio: 1800, talla: 'M', cantidad: 1, imagen: 'logo.svg' }])
       );
     });
     await page.reload();

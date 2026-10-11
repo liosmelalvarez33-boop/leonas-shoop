@@ -37,8 +37,6 @@ INSERT OR IGNORE INTO product_variants (product_id, talla, stock, sku)
 VALUES ('camisa-floral', 'M', 5, 'CAMISA-FLORAL-M');
 INSERT OR IGNORE INTO product_variants (product_id, talla, stock, sku)
 VALUES ('camisa-floral', 'L', 5, 'CAMISA-FLORAL-L');
-INSERT OR IGNORE INTO product_images (product_id, r2_key, orden, alt_text)
-VALUES ('camisa-floral', 'products/camisa-floral/camisa-floral.svg', 0, 'Camisa floral');
 
 INSERT OR REPLACE INTO products (id, titulo, categoria, precio, condicion, estado, descripcion, destacado, slug, meta_title, meta_description)
 VALUES (
@@ -62,8 +60,6 @@ INSERT OR IGNORE INTO product_variants (product_id, talla, stock, sku)
 VALUES ('jean-clasico', '32', 5, 'JEAN-CLASICO-32');
 INSERT OR IGNORE INTO product_variants (product_id, talla, stock, sku)
 VALUES ('jean-clasico', '34', 5, 'JEAN-CLASICO-34');
-INSERT OR IGNORE INTO product_images (product_id, r2_key, orden, alt_text)
-VALUES ('jean-clasico', 'products/jean-clasico/jean-clasico.svg', 0, 'Jeans clasico azul');
 
 INSERT OR REPLACE INTO products (id, titulo, categoria, precio, condicion, estado, descripcion, destacado, slug, meta_title, meta_description)
 VALUES (
@@ -83,8 +79,6 @@ INSERT OR IGNORE INTO product_variants (product_id, talla, stock, sku)
 VALUES ('vestido-rojo', 'S', 5, 'VESTIDO-ROJO-S');
 INSERT OR IGNORE INTO product_variants (product_id, talla, stock, sku)
 VALUES ('vestido-rojo', 'M', 5, 'VESTIDO-ROJO-M');
-INSERT OR IGNORE INTO product_images (product_id, r2_key, orden, alt_text)
-VALUES ('vestido-rojo', 'products/vestido-rojo/vestido-rojo.svg', 0, 'Vestido rojo elegante');
 
 INSERT OR REPLACE INTO products (id, titulo, categoria, precio, condicion, estado, descripcion, destacado, slug, meta_title, meta_description)
 VALUES (
@@ -106,8 +100,6 @@ INSERT OR IGNORE INTO product_variants (product_id, talla, stock, sku)
 VALUES ('blusa-seda', 'M', 5, 'BLUSA-SEDA-M');
 INSERT OR IGNORE INTO product_variants (product_id, talla, stock, sku)
 VALUES ('blusa-seda', 'L', 5, 'BLUSA-SEDA-L');
-INSERT OR IGNORE INTO product_images (product_id, r2_key, orden, alt_text)
-VALUES ('blusa-seda', 'products/blusa-seda/blusa-seda.svg', 0, 'Blusa de seda beige');
 
 INSERT OR REPLACE INTO products (id, titulo, categoria, precio, condicion, estado, descripcion, destacado, slug, meta_title, meta_description)
 VALUES (
@@ -127,8 +119,6 @@ INSERT OR IGNORE INTO product_variants (product_id, talla, stock, sku)
 VALUES ('chaqueta-jean', 'M', 5, 'CHAQUETA-JEAN-M');
 INSERT OR IGNORE INTO product_variants (product_id, talla, stock, sku)
 VALUES ('chaqueta-jean', 'L', 5, 'CHAQUETA-JEAN-L');
-INSERT OR IGNORE INTO product_images (product_id, r2_key, orden, alt_text)
-VALUES ('chaqueta-jean', 'products/chaqueta-jean/chaqueta-jean.svg', 0, 'Chaqueta de mezclilla');
 
 INSERT OR REPLACE INTO products (id, titulo, categoria, precio, condicion, estado, descripcion, destacado, slug, meta_title, meta_description)
 VALUES (
@@ -150,8 +140,6 @@ INSERT OR IGNORE INTO product_variants (product_id, talla, stock, sku)
 VALUES ('polo-deportivo', 'L', 0, 'POLO-DEPORTIVO-L');
 INSERT OR IGNORE INTO product_variants (product_id, talla, stock, sku)
 VALUES ('polo-deportivo', 'XL', 0, 'POLO-DEPORTIVO-XL');
-INSERT OR IGNORE INTO product_images (product_id, r2_key, orden, alt_text)
-VALUES ('polo-deportivo', 'products/polo-deportivo/polo-deportivo.svg', 0, 'Polo deportivo');
 
 INSERT OR REPLACE INTO products (id, titulo, categoria, precio, condicion, estado, descripcion, destacado, slug, meta_title, meta_description)
 VALUES (
@@ -177,8 +165,6 @@ INSERT OR IGNORE INTO product_variants (product_id, talla, stock, sku)
 VALUES ('zapatos-tacon', '39', 5, 'ZAPATOS-TACON-39');
 INSERT OR IGNORE INTO product_variants (product_id, talla, stock, sku)
 VALUES ('zapatos-tacon', '40', 5, 'ZAPATOS-TACON-40');
-INSERT OR IGNORE INTO product_images (product_id, r2_key, orden, alt_text)
-VALUES ('zapatos-tacon', 'products/zapatos-tacon/zapatos-tacon.svg', 0, 'Zapatos de tacon negro');
 
 INSERT OR REPLACE INTO products (id, titulo, categoria, precio, condicion, estado, descripcion, destacado, slug, meta_title, meta_description)
 VALUES (
@@ -206,8 +192,6 @@ INSERT OR IGNORE INTO product_variants (product_id, talla, stock, sku)
 VALUES ('tenis-blancos', '42', 5, 'TENIS-BLANCOS-42');
 INSERT OR IGNORE INTO product_variants (product_id, talla, stock, sku)
 VALUES ('tenis-blancos', '43', 5, 'TENIS-BLANCOS-43');
-INSERT OR IGNORE INTO product_images (product_id, r2_key, orden, alt_text)
-VALUES ('tenis-blancos', 'products/tenis-blancos/tenis-blancos.svg', 0, 'Tenis blancos');
 
 INSERT OR REPLACE INTO products (id, titulo, categoria, precio, condicion, estado, descripcion, destacado, slug, meta_title, meta_description)
 VALUES (
@@ -235,8 +219,6 @@ INSERT OR IGNORE INTO product_variants (product_id, talla, stock, sku)
 VALUES ('sandalias-playa', '40', 5, 'SANDALIAS-PLAYA-40');
 INSERT OR IGNORE INTO product_variants (product_id, talla, stock, sku)
 VALUES ('sandalias-playa', '41', 5, 'SANDALIAS-PLAYA-41');
-INSERT OR IGNORE INTO product_images (product_id, r2_key, orden, alt_text)
-VALUES ('sandalias-playa', 'products/sandalias-playa/sandalias-playa.svg', 0, 'Sandalias de playa');
 
 INSERT OR REPLACE INTO products (id, titulo, categoria, precio, condicion, estado, descripcion, destacado, slug, meta_title, meta_description)
 VALUES (
@@ -254,8 +236,6 @@ VALUES (
 );
 INSERT OR IGNORE INTO product_variants (product_id, talla, stock, sku)
 VALUES ('bolso-cuero', 'Unica', 1, 'BOLSO-CUERO-UNICA');
-INSERT OR IGNORE INTO product_images (product_id, r2_key, orden, alt_text)
-VALUES ('bolso-cuero', 'products/bolso-cuero/bolso-cuero.svg', 0, 'Bolso de cuero');
 
 INSERT OR REPLACE INTO products (id, titulo, categoria, precio, condicion, estado, descripcion, destacado, slug, meta_title, meta_description)
 VALUES (
@@ -273,8 +253,6 @@ VALUES (
 );
 INSERT OR IGNORE INTO product_variants (product_id, talla, stock, sku)
 VALUES ('reloj-classic', 'Unica', 0, 'RELOJ-CLASSIC-UNICA');
-INSERT OR IGNORE INTO product_images (product_id, r2_key, orden, alt_text)
-VALUES ('reloj-classic', 'products/reloj-classic/reloj-classic.svg', 0, 'Reloj clasico dorado');
 
 INSERT OR REPLACE INTO products (id, titulo, categoria, precio, condicion, estado, descripcion, destacado, slug, meta_title, meta_description)
 VALUES (
@@ -292,8 +270,6 @@ VALUES (
 );
 INSERT OR IGNORE INTO product_variants (product_id, talla, stock, sku)
 VALUES ('mochila-escolar', 'Unica', 5, 'MOCHILA-ESCOLAR-UNICA');
-INSERT OR IGNORE INTO product_images (product_id, r2_key, orden, alt_text)
-VALUES ('mochila-escolar', 'products/mochila-escolar/mochila-escolar.svg', 0, 'Mochila escolar');
 
 INSERT OR REPLACE INTO products (id, titulo, categoria, precio, condicion, estado, descripcion, destacado, slug, meta_title, meta_description)
 VALUES (
@@ -311,8 +287,6 @@ VALUES (
 );
 INSERT OR IGNORE INTO product_variants (product_id, talla, stock, sku)
 VALUES ('cortinas-lino', 'Unica', 5, 'CORTINAS-LINO-UNICA');
-INSERT OR IGNORE INTO product_images (product_id, r2_key, orden, alt_text)
-VALUES ('cortinas-lino', 'products/cortinas-lino/cortinas-lino.svg', 0, 'Cortinas de lino');
 
 INSERT OR REPLACE INTO products (id, titulo, categoria, precio, condicion, estado, descripcion, destacado, slug, meta_title, meta_description)
 VALUES (
@@ -330,8 +304,6 @@ VALUES (
 );
 INSERT OR IGNORE INTO product_variants (product_id, talla, stock, sku)
 VALUES ('tablero-ajedrez', 'Unica', 1, 'TABLERO-AJEDREZ-UNICA');
-INSERT OR IGNORE INTO product_images (product_id, r2_key, orden, alt_text)
-VALUES ('tablero-ajedrez', 'products/tablero-ajedrez/tablero-ajedrez.svg', 0, 'Tablero de ajedrez');
 
 -- Reset order counter
 UPDATE order_counter SET value = 0;

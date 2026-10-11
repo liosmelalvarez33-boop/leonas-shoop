@@ -107,7 +107,7 @@ const jsonLd = {
             <div class="relative h-[440px] w-[430px]">
               <div class="absolute left-0 top-0 w-52 -rotate-6 overflow-hidden rounded-2xl border border-line bg-panel shadow-2xl shadow-black/15">
                 <img
-                  src={`/img/productos/${productoCollage1.imagenes[0]}`}
+                  src={productoCollage1.imagenes[0] ? `/img/productos/${productoCollage1.imagenes[0]}` : '/img/logo.svg'}
                   alt={productoCollage1.titulo}
                   width="448"
                   height="560"
@@ -125,7 +125,7 @@ const jsonLd = {
               </div>
               <div class="absolute bottom-0 right-0 w-52 rotate-[5deg] overflow-hidden rounded-2xl border border-line bg-panel shadow-2xl shadow-black/15">
                 <img
-                  src={`/img/productos/${productoCollage2.imagenes[0]}`}
+                  src={productoCollage2.imagenes[0] ? `/img/productos/${productoCollage2.imagenes[0]}` : '/img/logo.svg'}
                   alt={productoCollage2.titulo}
                   width="448"
                   height="560"

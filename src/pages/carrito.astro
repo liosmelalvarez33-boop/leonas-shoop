@@ -188,8 +188,8 @@ import config from '../data/config.json';
         .map(
           (item, i) => `
         <div class="card flex gap-4 p-4" data-index="${i}">
-          <img src="/img/productos/${item.imagen}" alt="" width="80" height="100"
-               class="h-24 w-20 shrink-0 rounded-lg bg-sunken object-cover" />
+          <img src="${item.imagen && item.imagen !== 'logo.svg' ? `/img/productos/${item.imagen}` : '/img/logo.svg'}" alt="" width="80" height="100"
+               class="h-24 w-20 shrink-0 rounded-lg bg-sunken object-cover" onerror="this.onerror=null;this.src='/img/logo.svg'" />
           <div class="min-w-0 flex-1">
             <p class="truncate font-bold text-fg">${item.titulo}</p>
             <p class="mt-0.5 text-xs text-fg-subtle">${item.talla ? `Talla ${item.talla} · ` : ''}${SIMBOLO}${formatPrice(item.precio)} c/u</p>

@@ -43,6 +43,13 @@ import Base from '../layouts/Base.astro';
       return s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c] as string);
     }
 
+    // Compatibilidad: favoritos viejos guardaban solo el nombre del archivo.
+    function srcDe(imagen: string): string {
+      if (imagen.startsWith('/') || imagen.startsWith('http')) return imagen;
+      if (imagen === 'logo.svg') return '/img/logo.svg';
+      return `/img/productos/${imagen}`;
+    }
+
     function render() {
       const favs = getFavs();
       vacio.classList.toggle('hidden', favs.length > 0);
@@ -53,7 +60,7 @@ import Base from '../layouts/Base.astro';
         <article class="card group relative flex flex-col">
           <a href="/producto/${encodeURIComponent(f.id)}" class="flex flex-1 flex-col">
             <div class="relative aspect-[4/5] overflow-hidden bg-sunken">
-              <img src="/img/productos/${esc(f.imagen)}" alt="${esc(f.titulo)}" width="400" height="500" loading="lazy" decoding="async" class="h-full w-full object-cover" onerror="this.onerror=null;this.src='/img/logo.svg'" />
+              <img src="${esc(srcDe(f.imagen))}" alt="${esc(f.titulo)}" width="400" height="500" loading="lazy" decoding="async" class="h-full w-full object-cover" onerror="this.onerror=null;this.src='/img/logo.svg'" />
             </div>
             <div class="flex flex-1 flex-col p-4">
               <h3 class="text-base font-bold leading-snug text-fg">${esc(f.titulo)}</h3>

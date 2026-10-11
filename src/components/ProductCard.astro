@@ -28,7 +28,7 @@ const tallasResumen =
     data-fav={producto.id}
     data-titulo={producto.titulo}
     data-precio={producto.precio}
-    data-imagen={producto.imagenes[0] || 'logo.svg'}
+    data-imagen={producto.imagenes[0] ? `/img/productos/${producto.imagenes[0]}` : '/img/logo.svg'}
     aria-label={`Guardar ${producto.titulo} en favoritos`}
     aria-pressed="false"
     class="fav-btn absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-panel/90 text-fg-muted shadow-md backdrop-blur transition hover:scale-110 hover:text-rose-600"
@@ -41,7 +41,7 @@ const tallasResumen =
   >
     <div class="relative aspect-[4/5] overflow-hidden bg-sunken">
       <img
-        src={`/img/productos/${producto.imagenes[0]}`}
+        src={producto.imagenes[0] ? `/img/productos/${producto.imagenes[0]}` : '/img/logo.svg'}
         alt={producto.titulo}
         width="800"
         height="1000"
