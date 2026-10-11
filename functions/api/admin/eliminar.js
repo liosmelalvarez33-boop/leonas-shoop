@@ -1,4 +1,4 @@
-// Eliminar producto (y sus fotos guardadas en KV).
+// Eliminar producto: D1 (transacción) + KV (respaldo) + R2 (si existe).
 import { json, error, leerJson, exigirSesion, getProductos, esTexto } from '../../_lib.js';
 
 export async function onRequestPost({ request, env }) {
@@ -17,15 +17,59 @@ export async function onRequestPost({ request, env }) {
 
   const lista = await getProductos(env);
   const indice = lista.findIndex((p) => p.id === id);
-  if (indice < 0) return error('Ese producto no existe', 404);
+  const enKV = indice >= 0;
+  const enD1 = await existeEnD1(env, id);
+  if (!enKV && !enD1) return error('Ese producto no existe', 404);
 
-  const [producto] = lista.splice(indice, 1);
-  await env.DATOS.put('productos', JSON.stringify(lista));
-
-  // Borrar sus fotos de KV (si eran estáticas, no pasa nada).
-  for (const foto of producto.imagenes || []) {
-    await env.DATOS.delete(`fotos:${foto}`);
+  let productoKV = null;
+  if (enKV) {
+    [productoKV] = lista.splice(indice, 1);
+    await env.DATOS.put('productos', JSON.stringify(lista));
   }
 
-  return json({ ok: true });
+  // D1: transacción — primero desvincular pedidos (conserva historial),
+  // luego variantes, imágenes, espera y el producto.
+  if (enD1) {
+    try {
+      await env.DB.batch([
+        env.DB.prepare('UPDATE order_items SET product_id = NULL WHERE product_id = ?').bind(id),
+        env.DB.prepare('DELETE FROM stock_reservas WHERE product_id = ?').bind(id),
+        env.DB.prepare('DELETE FROM product_variants WHERE product_id = ?').bind(id),
+        env.DB.prepare('DELETE FROM product_images WHERE product_id = ?').bind(id),
+        env.DB.prepare('DELETE FROM lista_espera WHERE product_id = ?').bind(id),
+        env.DB.prepare('DELETE FROM products WHERE id = ?').bind(id),
+      ]);
+    } catch {
+      return error('No se pudo eliminar en la base de datos', 500);
+    }
+  }
+
+  // Borrar sus fotos de KV (si eran estáticas, no pasa nada).
+  for (const foto of (productoKV && productoKV.imagenes) || []) {
+    await env.DATOS.delete(`fotos:${foto}`).catch(() => {});
+  }
+
+  // Borrar sus fotos de R2 (si el binding existe).
+  if (env.IMAGES && typeof env.IMAGES.list === 'function') {
+    try {
+      const listaR2 = await env.IMAGES.list({ prefix: `products/${id}/` });
+      for (const obj of listaR2.objects || []) {
+        await env.IMAGES.delete(obj.key).catch(() => {});
+      }
+    } catch {
+      /* R2 opcional */
+    }
+  }
+
+  return json({ ok: true, fuente: enD1 ? 'd1' : 'kv' });
+}
+
+async function existeEnD1(env, id) {
+  if (!env.DB || typeof env.DB.prepare !== 'function') return false;
+  try {
+    const r = await env.DB.prepare('SELECT id FROM products WHERE id = ?').bind(id).first();
+    return Boolean(r);
+  } catch {
+    return false;
+  }
 }
