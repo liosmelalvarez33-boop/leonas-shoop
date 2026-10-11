@@ -17,11 +17,13 @@ const claseLink = (activa: boolean) =>
   <div class="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-4 sm:px-6">
     <a href="/" class="flex items-center gap-2.5" aria-label={`${config.nombre} - Inicio`}>
       <img
-        src="/img/logo.svg"
+        src="/logo-leonas-shoop.png"
         alt=""
-        width="36"
-        height="36"
-        class="h-9 w-9 shrink-0 rounded-[10px] shadow-sm"
+        width="84"
+        height="56"
+        fetchpriority="high"
+        decoding="async"
+        class="h-12 w-auto shrink-0 sm:h-14"
       />
       <span class="flex flex-col leading-tight">
         <span class="text-base font-extrabold tracking-tight text-fg">
