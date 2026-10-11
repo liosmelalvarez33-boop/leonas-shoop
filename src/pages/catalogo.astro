@@ -2,6 +2,7 @@
 import Base from '../layouts/Base.astro';
 import ProductCard from '../components/ProductCard.astro';
 import CtaBanner from '../components/CtaBanner.astro';
+import SizeGuide from '../components/SizeGuide.astro';
 import { categorias, productos, todasLasTallas } from '../lib/catalogo';
 import configJson from '../data/config.json';
 
@@ -136,6 +137,8 @@ const datosBase = JSON.stringify({ productos, config: configJson }).replace(/</g
 
   <CtaBanner />
 
+  <SizeGuide />
+
   <script type="application/json" id="datos-base" set:html={datosBase} />
 
   <dialog id="detalle" aria-label="Detalle del producto">
@@ -212,6 +215,7 @@ const datosBase = JSON.stringify({ productos, config: configJson }).replace(/</g
       const total = datos.productos.length;
       grid.dataset.total = String(total);
       aplicar();
+      window.dispatchEvent(new CustomEvent('favs:changed'));
     }
 
     function pintarCategorias() {
@@ -285,10 +289,20 @@ const datosBase = JSON.stringify({ productos, config: configJson }).replace(/</g
     }
 
     // ---------- Detalle (?p=<id>) ----------
+    function relacionadosDe(p: Producto): Producto[] {
+      const mismos = datos.productos.filter(
+        (x) => x.categoria === p.categoria && x.id !== p.id && x.estado !== 'vendido',
+      );
+      const otros = datos.productos.filter(
+        (x) => x.categoria !== p.categoria && x.id !== p.id && x.estado !== 'vendido',
+      );
+      return [...mismos, ...otros].slice(0, 4);
+    }
+
     function abrirDetalle(id: string, push = true) {
       const p = datos.productos.find((x) => x.id === id);
       if (!p) return;
-      dlgCuerpo.innerHTML = detalleHTML(p, datos.config);
+      dlgCuerpo.innerHTML = detalleHTML(p, datos.config, relacionadosDe(p));
       const raiz = dlgCuerpo.firstElementChild as HTMLElement;
       montarDetalle(raiz, p, showToast);
       if (!dlg.open) dlg.showModal();

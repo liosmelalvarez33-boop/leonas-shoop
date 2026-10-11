@@ -124,6 +124,48 @@ const ogImage = new URL(image ?? '/img/og-cover.png', Astro.site);
     </script>
 
     <script>
+      // Favoritos: delegación global (funciona en tarjetas SSR y en vivo).
+      import { toggleFav, esFav } from '../lib/favoritos';
+      import { showToast } from '../scripts/toast';
+
+      function pintarFavs() {
+        for (const b of document.querySelectorAll<HTMLButtonElement>('.fav-btn[data-fav]')) {
+          const activo = esFav(b.dataset.fav || '');
+          b.setAttribute('aria-pressed', String(activo));
+          b.classList.toggle('text-rose-600', activo);
+          const svg = b.querySelector('svg');
+          if (svg) svg.setAttribute('fill', activo ? 'currentColor' : 'none');
+        }
+        const n = document.querySelectorAll('.fav-btn[aria-pressed="true"]').length;
+        for (const c of document.querySelectorAll<HTMLElement>('#favs-count')) {
+          c.textContent = String(n);
+          c.classList.toggle('hidden', n === 0);
+        }
+      }
+
+      document.addEventListener('click', (e) => {
+        const b = (e.target as HTMLElement).closest<HTMLButtonElement>('.fav-btn[data-fav]');
+        if (!b) return;
+        e.preventDefault();
+        e.stopPropagation();
+        const added = toggleFav({
+          id: b.dataset.fav || '',
+          titulo: b.dataset.titulo || '',
+          precio: Number(b.dataset.precio || 0),
+          imagen: b.dataset.imagen || 'logo.svg',
+        });
+        showToast(added ? 'Guardado en favoritos' : 'Quitado de favoritos');
+        pintarFavs();
+      });
+      window.addEventListener('favs:changed', pintarFavs);
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', pintarFavs, { once: true });
+      } else {
+        pintarFavs();
+      }
+    </script>
+
+    <script>
       // Datos en vivo: WhatsApp, horario, categorías y destacados desde la nube.
       import { hidratar, alCambiarConfig } from '../lib/vivo';
       import { fijarConfigViva } from '../lib/whatsapp';

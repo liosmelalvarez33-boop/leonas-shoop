@@ -99,6 +99,23 @@ const claseLink = (activa: boolean) =>
       </button>
 
       <a
+        href="/favoritos"
+        class="relative hidden h-9 w-9 items-center justify-center rounded-xl border border-line bg-panel text-fg-muted transition hover:border-brand-400 hover:text-accent sm:flex"
+        aria-label="Ver favoritos"
+      >
+        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+          stroke-linecap="round" stroke-linejoin="round"><path
+            d="M19.5 12.6L12 20l-7.5-7.4A5 5 0 1112 6.2a5 5 0 117.5 6.4z"
+          ></path></svg
+        >
+        <span
+          id="favs-count"
+          class="absolute -right-1.5 -top-1.5 hidden min-w-[1.25rem] rounded-full bg-rose-600 px-1 text-center text-[11px] font-bold leading-5 text-white"
+          >0</span
+        >
+      </a>
+
+      <a
         href="/carrito"
         class="relative flex h-9 w-9 items-center justify-center rounded-xl border border-line bg-panel text-fg-muted transition hover:border-brand-400 hover:text-accent"
         aria-label="Ver carrito"
@@ -143,6 +160,9 @@ const claseLink = (activa: boolean) =>
       <a
         href="/catalogo"
         class="rounded-lg px-3 py-2.5 text-sm font-medium text-fg-muted hover:bg-sunken">Catálogo</a
+      >
+      <a href="/favoritos" class="rounded-lg px-3 py-2.5 text-sm font-medium text-fg-muted hover:bg-sunken"
+        >Favoritos</a
       >
       <div data-categorias="menu">
         {

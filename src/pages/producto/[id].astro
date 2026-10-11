@@ -3,6 +3,7 @@ import Base from '../../layouts/Base.astro';
 import ProductCard from '../../components/ProductCard.astro';
 import ProductImage from '../../components/ProductImage.astro';
 import CtaBanner from '../../components/CtaBanner.astro';
+import SizeGuide from '../../components/SizeGuide.astro';
 import { productos, porCategoria, categoriaDe } from '../../lib/catalogo';
 import { mensajeProducto, waLink } from '../../lib/whatsapp';
 import { formatPrice } from '../../lib/format';
@@ -118,9 +119,42 @@ const breadcrumbLd = {
         </p>
         <p class="mt-4 leading-relaxed text-fg-muted">{producto.descripcion}</p>
         {producto.tallas.length > 0 && (
-          <p class="mt-4 text-sm text-fg-muted">
-            <strong class="text-fg">Tallas:</strong> {producto.tallas.join(', ')}
-          </p>
+          <div class="mt-4 flex flex-wrap items-center gap-3 text-sm text-fg-muted">
+            <p><strong class="text-fg">Tallas:</strong> {producto.tallas.join(', ')}</p>
+            <button
+              type="button"
+              data-abrir-guia
+              class="text-xs font-semibold text-accent hover:underline"
+            >
+              Ver guía de tallas
+            </button>
+          </div>
+        )}
+        {!disponible && (
+          <form data-espera={producto.id} class="mt-6 space-y-3 rounded-2xl border border-line bg-sunken p-4">
+            <p class="text-sm font-bold text-fg">Avísame cuando esté disponible</p>
+            <p class="text-xs text-fg-subtle">Te escribimos por WhatsApp en cuanto vuelva.</p>
+            <div class="grid gap-2 sm:grid-cols-2">
+              <input
+                name="nombre"
+                required
+                maxlength="120"
+                placeholder="Tu nombre"
+                autocomplete="name"
+                class="input"
+              />
+              <input
+                name="telefono"
+                required
+                inputmode="tel"
+                placeholder="Tu WhatsApp (ej: 5354704764)"
+                autocomplete="tel"
+                class="input"
+              />
+            </div>
+            <button type="submit" class="btn-base btn-dark w-full sm:w-auto">Avisarme</button>
+            <p data-espera-msg class="hidden text-xs font-semibold"></p>
+          </form>
         )}
         {!disponible && producto.estado === 'reservado' && (
           <p class="mt-4 text-sm font-semibold text-sky-700">Reservado: pregúntanos por lista de espera.</p>
@@ -158,4 +192,47 @@ const breadcrumbLd = {
   </div>
 
   <CtaBanner />
+
+  <SizeGuide />
+
+  <script>
+    import { showToast } from '../../scripts/toast';
+
+    document.querySelector('[data-abrir-guia]')?.addEventListener('click', () => {
+      (document.getElementById('guia-tallas') as HTMLDialogElement | null)?.showModal();
+    });
+
+    for (const form of document.querySelectorAll<HTMLFormElement>('form[data-espera]')) {
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const msg = form.querySelector('[data-espera-msg]') as HTMLElement;
+        const fd = new FormData(form);
+        try {
+          const r = await fetch('/api/lista-espera', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              product_id: form.dataset.espera,
+              nombre: String(fd.get('nombre') || ''),
+              telefono: String(fd.get('telefono') || ''),
+            }),
+          });
+          const d = await r.json().catch(() => null);
+          if (r.ok) {
+            msg.textContent = '✓ Te avisaremos por WhatsApp.';
+            msg.className = 'text-xs font-semibold text-emerald-700';
+            showToast('Guardado en lista de espera');
+            form.reset();
+          } else {
+            msg.textContent = d?.error || 'No se pudo guardar.';
+            msg.className = 'text-xs font-semibold text-rose-600';
+          }
+        } catch {
+          msg.textContent = 'Sin conexión. Intenta de nuevo.';
+          msg.className = 'text-xs font-semibold text-rose-600';
+        }
+        msg.classList.remove('hidden');
+      });
+    }
+  </script>
 </Base>

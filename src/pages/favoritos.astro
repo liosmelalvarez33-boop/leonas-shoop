@@ -1,0 +1,83 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base
+  title="Favoritos"
+  description="Tus artículos guardados en Leonas Shoop. Añádelos al carrito cuando quieras."
+>
+  <div class="mx-auto max-w-6xl px-4 py-10 sm:px-6">
+    <span class="kicker">Guardados</span>
+    <h1 class="mt-2 text-3xl font-extrabold tracking-tight text-fg">Favoritos</h1>
+    <p class="mt-2 text-sm text-fg-muted">
+      Se guardan en tu celular. Añade al carrito cuando estés lista/o.
+    </p>
+
+    <div
+      id="favs-empty"
+      class="mt-6 hidden rounded-2xl border border-dashed border-line-2 p-10 text-center"
+    >
+      <p class="text-lg font-bold text-fg">Aún no tienes favoritos</p>
+      <p class="mt-1 text-sm text-fg-subtle">Toca el corazón ♡ en cualquier producto para guardarlo.</p>
+      <a href="/catalogo" class="btn-base btn-primary mt-5">Ver catálogo</a>
+    </div>
+
+    <div id="favs-view" class="mt-6 hidden">
+      <div id="favs-items" class="grid grid-cols-2 gap-5 md:grid-cols-3 xl:grid-cols-4"></div>
+      <div class="mt-6 flex flex-wrap gap-3">
+        <a href="/catalogo" class="text-sm font-semibold text-accent hover:underline">← Seguir explorando</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    import { getFavs, quitarFav } from '../lib/favoritos';
+    import { formatPrice } from '../lib/format';
+    import { showToast } from '../scripts/toast';
+
+    const vacio = document.getElementById('favs-empty') as HTMLDivElement;
+    const vista = document.getElementById('favs-view') as HTMLDivElement;
+    const cont = document.getElementById('favs-items') as HTMLDivElement;
+
+    function esc(s: string): string {
+      return s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c] as string);
+    }
+
+    function render() {
+      const favs = getFavs();
+      vacio.classList.toggle('hidden', favs.length > 0);
+      vista.classList.toggle('hidden', favs.length === 0);
+      cont.innerHTML = favs
+        .map(
+          (f) => `
+        <article class="card group relative flex flex-col">
+          <a href="/producto/${encodeURIComponent(f.id)}" class="flex flex-1 flex-col">
+            <div class="relative aspect-[4/5] overflow-hidden bg-sunken">
+              <img src="/img/productos/${esc(f.imagen)}" alt="${esc(f.titulo)}" width="400" height="500" loading="lazy" decoding="async" class="h-full w-full object-cover" onerror="this.onerror=null;this.src='/img/logo.svg'" />
+            </div>
+            <div class="flex flex-1 flex-col p-4">
+              <h3 class="text-base font-bold leading-snug text-fg">${esc(f.titulo)}</h3>
+              <p class="mt-2 text-lg font-extrabold text-fg">$${formatPrice(f.precio)}</p>
+            </div>
+          </a>
+          <div class="flex gap-2 p-4 pt-0">
+            <a href="/producto/${encodeURIComponent(f.id)}" class="btn-base btn-primary flex-1 text-center text-sm">Ver</a>
+            <button type="button" data-quitar="${esc(f.id)}" class="btn-base btn-outline text-sm">Quitar</button>
+          </div>
+        </article>`,
+        )
+        .join('');
+    }
+
+    cont.addEventListener('click', (e) => {
+      const b = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-quitar]');
+      if (!b) return;
+      quitarFav(b.dataset.quitar || '');
+      showToast('Quitado de favoritos');
+      render();
+    });
+
+    window.addEventListener('favs:changed', render);
+    render();
+  </script>
+</Base>

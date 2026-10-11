@@ -1,0 +1,48 @@
+---
+// Guía de tallas: modal con tablas de ropa y zapatos + cómo medirse.
+interface Props {
+  id?: string;
+}
+const { id = 'guia-tallas' } = Astro.props;
+---
+
+<dialog id={id} aria-label="Guía de tallas" class="rounded-2xl border border-line bg-panel p-0 text-fg shadow-2xl" style="width:min(560px,calc(100vw - 24px))">
+  <div class="flex items-center justify-between gap-3 border-b border-line p-4">
+    <h2 class="text-lg font-extrabold">Guía de tallas</h2>
+    <form method="dialog"><button class="flex h-9 w-9 items-center justify-center rounded-full border border-line" aria-label="Cerrar">✕</button></form>
+  </div>
+  <div class="max-h-[70vh] space-y-5 overflow-y-auto p-5 text-sm">
+    <div>
+      <h3 class="font-bold">Ropa (letras)</h3>
+      <table class="mt-2 w-full border-collapse text-left text-[13px]">
+        <thead><tr class="text-fg-subtle"><th class="border-b border-line py-1.5">Talla</th><th class="border-b border-line py-1.5">Pecho (cm)</th><th class="border-b border-line py-1.5">Cintura (cm)</th></tr></thead>
+        <tbody>
+          <tr><td class="py-1.5 font-bold">S</td><td>84–89</td><td>66–71</td></tr>
+          <tr><td class="py-1.5 font-bold">M</td><td>90–95</td><td>72–77</td></tr>
+          <tr><td class="py-1.5 font-bold">L</td><td>96–101</td><td>78–83</td></tr>
+          <tr><td class="py-1.5 font-bold">XL</td><td>102–107</td><td>84–89</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <h3 class="font-bold">Zapatos (Cuba/EU)</h3>
+      <table class="mt-2 w-full border-collapse text-left text-[13px]">
+        <thead><tr class="text-fg-subtle"><th class="border-b border-line py-1.5">Talla</th><th class="border-b border-line py-1.5">Pie (cm)</th></tr></thead>
+        <tbody>
+          <tr><td class="py-1 font-bold">36</td><td>22.5</td></tr>
+          <tr><td class="py-1 font-bold">37</td><td>23.2</td></tr>
+          <tr><td class="py-1 font-bold">38</td><td>23.8</td></tr>
+          <tr><td class="py-1 font-bold">39</td><td>24.5</td></tr>
+          <tr><td class="py-1 font-bold">40</td><td>25.2</td></tr>
+          <tr><td class="py-1 font-bold">41</td><td>25.8</td></tr>
+          <tr><td class="py-1 font-bold">42</td><td>26.5</td></tr>
+          <tr><td class="py-1 font-bold">43</td><td>27.2</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="leading-relaxed text-fg-muted">
+      Mide tu pie descalza/o del talón al dedo gordo. Entre dos tallas, elige la mayor.
+      Los artículos de segunda mano pueden variar: pregúntanos medidas exactas por WhatsApp.
+    </p>
+  </div>
+</dialog>

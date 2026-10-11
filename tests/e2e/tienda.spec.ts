@@ -69,6 +69,20 @@ test.describe('Tienda Leonas Shoop', () => {
     await expect(page.locator('#cart-items .card').first()).toBeVisible();
   });
 
+  test('favoritos: guardar desde tarjeta y ver en página', async ({ page }) => {
+    await page.goto('/catalogo');
+    await page.locator('#grid .fav-btn').first().click();
+    await expect(page.getByText(/Guardado en favoritos/i)).toBeVisible({ timeout: 5000 });
+    await page.goto('/favoritos');
+    await expect(page.locator('#favs-items article').first()).toBeVisible();
+  });
+
+  test('producto agotado muestra lista de espera', async ({ page }) => {
+    await page.goto('/producto/polo-deportivo');
+    await expect(page.locator('form[data-espera]')).toBeVisible();
+    await expect(page.getByRole('button', { name: /Guía de tallas|Ver guía/i }).first()).toBeVisible();
+  });
+
   test('carrito muestra selector de pago y valida nombre', async ({ page }) => {
     await page.goto('/carrito');
     // Si está vacío, añadir algo vía localStorage directo

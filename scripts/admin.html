@@ -186,6 +186,7 @@
   <button class="tab" data-vista="productos">🛍️ Productos</button>
   <button class="tab" data-vista="pedidos">📦 Pedidos <span class="num oculto" id="badgePend"></span></button>
   <button class="tab" data-vista="abandonados">🛒 Abandonados <span class="num oculto" id="badgeAband"></span></button>
+  <button class="tab" data-vista="espera">🔔 Espera <span class="num oculto" id="badgeEspera"></span></button>
   <button class="tab" data-vista="tienda">⚙️ Tienda</button>
 </nav>
 
@@ -272,6 +273,19 @@
     <div class="vacio" id="vacioAbandonados" hidden>
       <b>Sin carritos abandonados</b>
       Cuando un cliente añada al carrito y no complete, aparecerá aquí.
+    </div>
+  </section>
+
+  <!-- ============ ESPERA ============ -->
+  <section id="vista-espera" hidden>
+    <div class="toolbar">
+      <span class="count">Clientes que quieren que les avises cuando vuelva un producto.</span>
+      <button class="btn" id="btnRecargarEspera">↻ Actualizar</button>
+    </div>
+    <div class="pedidos" id="listaEspera"></div>
+    <div class="vacio" id="vacioEspera" hidden>
+      <b>Sin lista de espera</b>
+      Aparece cuando un cliente pide aviso en un producto agotado o reservado.
     </div>
   </section>
 
@@ -429,7 +443,7 @@
   }
 
   // ---------- Pestañas ----------
-  const VISTAS = ['dashboard', 'productos', 'pedidos', 'abandonados', 'tienda'];
+  const VISTAS = ['dashboard', 'productos', 'pedidos', 'abandonados', 'espera', 'tienda'];
   function setVista(nombre) {
     VISTAS.forEach((v) => {
       $('#vista-' + v).hidden = v !== nombre;
@@ -439,6 +453,7 @@
     if (nombre === 'dashboard') cargarDashboard();
     if (nombre === 'pedidos') renderPedidos();
     if (nombre === 'abandonados') cargarAbandonados();
+    if (nombre === 'espera') cargarEspera();
     if (nombre === 'tienda') pintarTienda();
   }
   document.querySelectorAll('.tab').forEach((t) => t.addEventListener('click', () => setVista(t.dataset.vista)));
@@ -949,6 +964,48 @@
 
   $('#btnRecargarAband')?.addEventListener('click', cargarAbandonados);
   $('#btnRecargarDash')?.addEventListener('click', cargarDashboard);
+  $('#btnRecargarEspera')?.addEventListener('click', cargarEspera);
+
+  // ---------- Lista de espera ----------
+  async function cargarEspera() {
+    try {
+      const d = await api('/api/lista-espera');
+      const lista = (d.espera || []).filter((x) => !x.avisado_en);
+      const avisados = (d.espera || []).filter((x) => x.avisado_en).length;
+      $('#vacioEspera').hidden = lista.length > 0;
+      const porProd = {};
+      for (const x of lista) {
+        const k = x.product_id;
+        porProd[k] = porProd[k] || { titulo: x.titulo || x.product_id, items: [] };
+        porProd[k].items.push(x);
+      }
+      $('#listaEspera').innerHTML = Object.entries(porProd).map(([pid, g]) => `
+        <article class="pedido">
+          <div class="phead"><span class="pnum">${esc(g.titulo)}</span><span class="pfecha">${g.items.length} esperando</span></div>
+          <ul class="pitems">${g.items.map((x) => {
+            const waMsg = encodeURIComponent(`Hola ${x.nombre}, soy de Leonas Shoop. ¡Buenas noticias! "${g.titulo}" ya está disponible. ¿Lo apartamos para ti?`);
+            return `<li><span>${esc(x.nombre)} · ${esc(x.telefono)}</span><span style="display:flex;gap:6px"><a class="btn btn-wa" style="font-size:12px;padding:5px 10px;text-decoration:none" target="_blank" rel="noopener" href="https://wa.me/53${esc(x.telefono.replace(/\D/g, '').replace(/^53/, ''))}?text=${waMsg}">Avisar</a><button class="btn" style="font-size:12px;padding:5px 10px" data-avisado="${esc(x.id)}">✓ Listo</button></span></li>`;
+          }).join('')}</ul>
+        </article>`).join('') + (avisados ? `<p class="count">${avisados} ya avisados (ocultos).</p>` : '');
+      const b = $('#badgeEspera');
+      if (b) {
+        b.textContent = lista.length || '';
+        b.classList.toggle('oculto', lista.length === 0);
+      }
+    } catch (e) {
+      toast('No pude cargar la espera: ' + e.message, true);
+    }
+  }
+
+  $('#listaEspera')?.addEventListener('click', async (e) => {
+    const b = e.target.closest('[data-avisado]');
+    if (!b) return;
+    try {
+      await api('/api/lista-espera', { accion: 'avisado', id: b.dataset.avisado });
+      toast('Marcado como avisado ✓');
+      cargarEspera();
+    } catch (err) { toast(err.message, true); }
+  });
 
   // ---------- Salir ----------
   $('#btnSalir').addEventListener('click', async () => {
