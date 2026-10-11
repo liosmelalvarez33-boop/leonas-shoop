@@ -79,7 +79,7 @@ export async function getPedidosD1(env) {
   if (!tieneD1(env)) return null;
   try {
     const res = await env.DB.prepare(
-      'SELECT id, numero, fecha, nombre, entrega, notas, total, estado, metodo_pago, pago_confirmado FROM orders ORDER BY fecha DESC LIMIT 300'
+      'SELECT id, numero, fecha, nombre, entrega, notas, total, estado, metodo_pago, pago_confirmado, cliente_telefono FROM orders ORDER BY fecha DESC LIMIT 300'
     ).all();
     if (!res || !res.results) return null;
     const pedidos = [];
@@ -97,6 +97,7 @@ export async function getPedidosD1(env) {
         notas: o.notas || '',
         total: centavosAPesos(o.total),
         estado: o.estado,
+        telefono: o.cliente_telefono || null,
         metodo_pago: o.metodo_pago,
         pago_confirmado: Boolean(o.pago_confirmado),
         items: (items.results || []).map((it) => ({

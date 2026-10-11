@@ -99,5 +99,10 @@ test.describe('Tienda Leonas Shoop', () => {
     // Sin nombre → toast error
     await page.getByRole('button', { name: /Enviar pedido/i }).click();
     await expect(page.getByText(/Escribe tu nombre/i)).toBeVisible({ timeout: 5000 });
+    // Con nombre pero sin teléfono → toast error de teléfono
+    await page.fill('#nombre', 'María Pérez');
+    await page.fill('#entrega', 'Vedado');
+    await page.getByRole('button', { name: /Enviar pedido/i }).click();
+    await expect(page.getByText(/teléfono válido/i)).toBeVisible({ timeout: 5000 });
   });
 });

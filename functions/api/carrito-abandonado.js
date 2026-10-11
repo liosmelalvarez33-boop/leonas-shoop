@@ -31,6 +31,7 @@ export async function onRequestPost({ request, env }) {
     ? {
         nombre: String(cuerpo.client_data.nombre || '').slice(0, 120),
         entrega: String(cuerpo.client_data.entrega || '').slice(0, 200),
+        telefono: String(cuerpo.client_data.telefono || '').replace(/\D/g, '').slice(0, 15),
       }
     : null;
 

@@ -431,6 +431,16 @@
 
   const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
+  // Normaliza un teléfono cubano a formato wa.me (53 + 8 dígitos).
+  // Devuelve '' si no hay número válido.
+  function waNum(tel) {
+    const d = String(tel || '').replace(/\D/g, '').replace(/^00/, '');
+    if (/^53\d{8}$/.test(d)) return d;
+    if (/^5\d{7}$/.test(d)) return '53' + d;
+    if (/^0?5\d{7}$/.test(d)) return '53' + d.replace(/^0/, '');
+    return '';
+  }
+
   function toast(msg, error) {
     const t = $('#toast');
     t.textContent = msg;
@@ -720,7 +730,7 @@
     const lista = datos.pedidos.filter((p) =>
       (!filtroPedidos || p.estado === filtroPedidos) &&
       (!filtroMetodo || (p.metodo_pago || 'efectivo') === filtroMetodo) &&
-      (!buscarPed || `${p.n} ${p.nombre} ${p.entrega}`.toLowerCase().includes(buscarPed))
+      (!buscarPed || `${p.n} ${p.nombre} ${p.entrega} ${p.telefono || ''}`.toLowerCase().includes(buscarPed))
     );
     $('#vacioPedidos').hidden = datos.pedidos.length > 0;
     $('#listaPedidos').innerHTML = lista.map((p) => {
@@ -739,8 +749,12 @@
           ? '<span class="badge verde">Pago ✓</span>'
           : `<button class="btn" data-pago="${esc(p.id)}" style="font-size:12px;padding:5px 10px">Confirmar pago</button>`)
         : '';
-      const waMsg = encodeURIComponent(`Hola ${p.nombre}, soy de Leonas Shoop. Tu pedido #${p.n} ($${Number(p.total).toLocaleString('es')}) está ${ETIQUETA_ESTADO[p.estado] || p.estado}. Coordinamos entrega en: ${p.entrega}.`);
-      const waNum = (datos.config && datos.config.whatsapp) || '';
+      const waMsg = encodeURIComponent(`Hola ${p.nombre}, soy de Leonas Shoop. Tu pedido #${p.n ?? p.numero} ($${Number(p.total).toLocaleString('es')}) está ${ETIQUETA_ESTADO[p.estado] || p.estado}. Coordinamos entrega en: ${p.entrega}.`);
+      const telCliente = waNum(p.telefono);
+      const telTxt = p.telefono ? esc(String(p.telefono)) : 'sin teléfono';
+      const btnWa = telCliente
+        ? `<a class="btn btn-wa" style="font-size:12.5px;padding:7px 12px;text-decoration:none" target="_blank" rel="noopener" href="https://wa.me/${telCliente}?text=${waMsg}">WhatsApp cliente</a>`
+        : `<span class="badge gris">Sin teléfono del cliente</span>`;
       return `<article class="pedido" data-pid="${esc(p.id)}">
         <div class="phead">
           <span class="pnum">Pedido #${p.n ?? p.numero}</span>
@@ -750,14 +764,14 @@
           <button class="btn" data-ticket="${esc(p.id)}" title="Imprimir ticket" style="font-size:12px;padding:5px 10px">🧾</button>
           <button class="pdel" data-del="${esc(p.id)}" title="Eliminar pedido">🗑</button>
         </div>
-        <div class="pcliente">${esc(p.nombre)}</div>
+        <div class="pcliente">${esc(p.nombre)} · 📞 ${telTxt}</div>
         <div class="pentrega">📍 ${esc(p.entrega)}</div>
         <ul class="pitems">${items}</ul>
         <div class="ptotal"><span>Total</span><span>${datos.simbolo}${Number(p.total).toLocaleString('es')}</span></div>
         ${p.notas ? `<div class="pnotas">📝 ${esc(p.notas)}</div>` : ''}
         <div class="pestados">${botones}</div>
         <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
-          <a class="btn btn-wa" style="font-size:12.5px;padding:7px 12px;text-decoration:none" target="_blank" rel="noopener" href="https://wa.me/${esc(waNum)}?text=${waMsg}">WhatsApp cliente</a>
+          ${btnWa}
         </div>
       </article>`;
     }).join('');
@@ -779,6 +793,7 @@
       `LEONAS SHOOP - Pedido #${p.n ?? p.numero}`,
       `${new Date(p.fecha).toLocaleString('es')}`,
       `Cliente: ${p.nombre}`,
+      `Tel: ${p.telefono || '-'}`,
       `Entrega: ${p.entrega}`,
       `Pago: ${p.metodo_pago === 'transfermovil' ? 'Transfermóvil' : 'Efectivo'}${p.pago_confirmado ? ' (confirmado)' : ''}`,
       '---',
@@ -952,14 +967,18 @@
         const items = (c.items || []).map((it) => `<li><span>${esc(it.titulo)}${it.talla ? ` (talla ${esc(it.talla)})` : ''} <span class="q">×${it.cantidad}</span></span><span>${datos.simbolo}${(it.precio * it.cantidad).toLocaleString('es')}</span></li>`).join('');
         const nombre = (c.client_data && c.client_data.nombre) || 'Cliente sin nombre';
         const entrega = (c.client_data && c.client_data.entrega) || 'Sin dirección';
+        const telRaw = (c.client_data && c.client_data.telefono) || '';
+        const telCliente = waNum(telRaw);
         const waMsg = encodeURIComponent(`Hola ${nombre}, soy de Leonas Shoop. Vimos que dejaste ${c.items.length} artículo(s) en tu carrito ($${Number(c.total).toLocaleString('es')}). ¿Te ayudo a completar tu pedido?`);
-        const waNum = (datos.config && datos.config.whatsapp) || '';
+        const btnRecuperar = telCliente
+          ? `<a class="btn btn-wa" style="font-size:13px;text-decoration:none" target="_blank" rel="noopener" href="https://wa.me/${telCliente}?text=${waMsg}">Recuperar por WhatsApp</a>`
+          : `<span class="badge gris">Sin teléfono — no se puede escribir</span>`;
         return `<article class="pedido">
           <div class="phead"><span class="pnum">${esc(nombre)}</span><span class="pfecha">${esc(fecha)}</span></div>
-          <div class="pentrega">📍 ${esc(entrega)}</div>
+          <div class="pentrega">📍 ${esc(entrega)}${telRaw ? ` · 📞 ${esc(String(telRaw))}` : ''}</div>
           <ul class="pitems">${items}</ul>
           <div class="ptotal"><span>Total</span><span>${datos.simbolo}${Number(c.total).toLocaleString('es')}</span></div>
-          <div style="margin-top:10px"><a class="btn btn-wa" style="font-size:13px;text-decoration:none" target="_blank" rel="noopener" href="https://wa.me/${esc(waNum)}?text=${waMsg}">Recuperar por WhatsApp</a></div>
+          <div style="margin-top:10px">${btnRecuperar}</div>
         </article>`;
       }).join('');
       const ab = $('#badgeAband');
