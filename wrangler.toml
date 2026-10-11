@@ -3,7 +3,24 @@ name = "leonas-shoop"
 compatibility_date = "2026-10-08"
 pages_build_output_dir = "dist"
 
-# Datos en vivo de la tienda: productos, fotos nuevas, configuración y pedidos.
+# Base de datos D1 para pedidos, inventario, analytics
+[[d1_databases]]
+binding = "DB"
+database_name = "leonas-shoop"
+database_id = "REPLACE_WITH_D1_DATABASE_ID"
+
+# Bucket R2 para imágenes de productos optimizadas
+[[r2_buckets]]
+binding = "IMAGES"
+bucket_name = "leonas-images"
+preview_bucket_name = "leonas-images-preview"
+
+# KV legacy: productos, fotos, configuración y pedidos (respaldo de D1).
 [[kv_namespaces]]
 binding = "DATOS"
 id = "70eeae838dab4c44852e65b2f2ff59f2"
+
+# Variables de entorno (secretos en wrangler secret put)
+[vars]
+TRANSFERMOVIL_PHONE = "5354704764"
+TRANSFERMOVIL_DEEPLINK = "transfermovil://pay?phone={phone}&amount={amount}&concept={concept}"

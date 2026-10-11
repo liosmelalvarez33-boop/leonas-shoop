@@ -69,6 +69,28 @@ import config from '../data/config.json';
             rows="3"
             placeholder="Horario preferido, referencia de la casa, color alternativo..."></textarea>
         </div>
+        <fieldset>
+          <legend class="mb-2 text-xs font-semibold text-fg-subtle">Método de pago *</legend>
+          <div class="grid gap-2 sm:grid-cols-2">
+            <label class="flex cursor-pointer items-center gap-3 rounded-xl border border-line-2 p-3 transition has-checked:border-brand-600 has-checked:bg-brand-50">
+              <input type="radio" name="metodo_pago" value="efectivo" class="h-4 w-4 accent-brand-600" checked />
+              <span>
+                <span class="block text-sm font-bold text-fg">Efectivo</span>
+                <span class="block text-xs text-fg-subtle">Pagas al recibir</span>
+              </span>
+            </label>
+            <label class="flex cursor-pointer items-center gap-3 rounded-xl border border-line-2 p-3 transition has-checked:border-brand-600 has-checked:bg-brand-50">
+              <input type="radio" name="metodo_pago" value="transfermovil" class="h-4 w-4 accent-brand-600" />
+              <span>
+                <span class="block text-sm font-bold text-fg">Transfermóvil</span>
+                <span class="block text-xs text-fg-subtle">Pagas desde tu móvil</span>
+              </span>
+            </label>
+          </div>
+          <p id="tm-ayuda" class="mt-2 hidden text-xs leading-relaxed text-fg-subtle">
+            Al enviar, registraremos tu pedido y te mostraremos los datos para transferir. Luego envías el comprobante por WhatsApp.
+          </p>
+        </fieldset>
         <button type="submit" id="btn-send" class="btn-base btn-wa w-full">
           Enviar pedido por WhatsApp
         </button>
@@ -104,6 +126,7 @@ import config from '../data/config.json';
     import { mensajePedido, waLink, SIMBOLO } from '../lib/whatsapp';
     import { formatPrice } from '../lib/format';
     import { showToast } from '../scripts/toast';
+    import { transfermovilLink, datosTransfermovilTexto, copiarTexto, type MetodoPago } from '../lib/payments';
 
     const vacio = document.getElementById('cart-empty') as HTMLDivElement;
     const vista = document.getElementById('cart-view') as HTMLDivElement;
@@ -115,6 +138,18 @@ import config from '../data/config.json';
     const notasEl = document.getElementById('notas') as HTMLTextAreaElement;
     const hint = document.getElementById('send-hint') as HTMLDivElement;
     const btnClear = document.getElementById('btn-clear') as HTMLButtonElement;
+    const tmAyuda = document.getElementById('tm-ayuda') as HTMLParagraphElement | null;
+
+    function metodoPagoElegido(): MetodoPago {
+      const elegido = (document.querySelector('input[name="metodo_pago"]:checked') as HTMLInputElement | null)?.value;
+      return elegido === 'transfermovil' ? 'transfermovil' : 'efectivo';
+    }
+
+    document.querySelectorAll('input[name="metodo_pago"]').forEach((r) => {
+      r.addEventListener('change', () => {
+        tmAyuda?.classList.toggle('hidden', metodoPagoElegido() !== 'transfermovil');
+      });
+    });
 
     const CLIENTE_KEY = 'leonas_shoop_cliente_v1';
 
@@ -215,29 +250,67 @@ import config from '../data/config.json';
 
       guardarCliente();
       enviando = true;
+      const metodo_pago = metodoPagoElegido();
+      const total = totalDe(carrito);
 
-      const mensaje = mensajePedido(carrito, { nombre, entrega, notas: notasEl.value });
+      const pagoTxt = metodo_pago === 'transfermovil'
+        ? '\nPago por Transfermóvil. Envío comprobante por aquí.'
+        : '\nPago en efectivo al entregar.';
+      const mensaje = mensajePedido(carrito, { nombre, entrega, notas: notasEl.value }) + pagoTxt;
       // WhatsApp se abre en el mismo gesto (para que el navegador no lo bloquee).
       window.open(waLink(mensaje), '_blank', 'noopener');
 
+      // Si eligió Transfermóvil, intentar abrir la app con los datos (no bloquea).
+      if (metodo_pago === 'transfermovil') {
+        try {
+          const link = transfermovilLink({ monto: total, concepto: `Pedido Leonas ${nombre}`.slice(0, 60) });
+          setTimeout(() => window.open(link, '_blank', 'noopener'), 600);
+        } catch {
+          /* si falla, el usuario copia los datos del hint */
+        }
+      }
+
       // El pedido queda registrado en la nube aunque el chat ya se haya abierto.
       const items = carrito.map((it) => ({
+        id: it.id,
         titulo: it.titulo,
         precio: Math.round(it.precio),
         cantidad: it.cantidad,
         talla: it.talla || null,
         imagen: /^[A-Za-z0-9._-]{1,80}$/.test(it.imagen ?? '') ? it.imagen : null,
       }));
-      fetch('/api/pedidos', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nombre, entrega, notas: notasEl.value.trim(), items, total: totalDe(carrito) }),
-      })
+      enviarPedido({ nombre, entrega, notas: notasEl.value.trim(), items, total, metodo_pago })
         .then(async (r) => {
-          const d = r.ok ? await r.json() : null;
+          const d = r.ok ? await r.json().catch(() => null) : null;
+          if (d?.ok === false || d?.error) {
+            hint.innerHTML = `No pudimos registrar tu pedido: ${d?.error || 'error desconocido'}. Revisa el carrito (precios/stock pudieron cambiar) y prueba de nuevo. El chat de WhatsApp ya se abrió con tu pedido.`;
+            showToast(d?.error || 'No se pudo registrar', 'error');
+            return;
+          }
           if (d?.numero) {
-            hint.innerHTML = `Tu pedido <strong>#${d.numero}</strong> quedó registrado en la tienda. Responde el chat de WhatsApp para confirmar entrega y pago; puedes vaciar el carrito cuando quieras.`;
-            showToast(`Pedido #${d.numero} registrado`);
+            // Pedido OK: marcar carrito como convertido (no guardar como abandonado).
+            try { sessionStorage.setItem('leonas_pedido_ok', String(d.numero)); } catch {}
+            if (metodo_pago === 'transfermovil') {
+              const concepto = `Pedido #${d.numero} Leonas`;
+              const datos = datosTransfermovilTexto({ monto: total, concepto });
+              const link = transfermovilLink({ monto: total, concepto });
+              hint.innerHTML = `<strong>Pedido #${d.numero} registrado.</strong> Stock reservado por 15 min.<br><br>
+                <strong>1.</strong> Abre Transfermóvil y paga:<br>
+                <code class="mt-2 block rounded-lg bg-emerald-100 p-3 whitespace-pre-wrap">${datos}</code>
+                <div class="mt-3 flex flex-col gap-2 sm:flex-row">
+                  <a href="${link}" class="btn-base btn-dark flex-1 text-center">Abrir Transfermóvil</a>
+                  <button type="button" id="btn-copiar-tm" class="btn-base btn-outline flex-1">Copiar datos</button>
+                </div>
+                <span class="mt-3 block"><strong>2.</strong> Envía el comprobante por el chat de WhatsApp que se abrió.<br><strong>3.</strong> Te confirmamos y coordinamos entrega.</span>`;
+              showToast(`Pedido #${d.numero} registrado`);
+              document.getElementById('btn-copiar-tm')?.addEventListener('click', async () => {
+                const ok = await copiarTexto(datos);
+                showToast(ok ? 'Datos copiados' : 'No se pudo copiar', ok ? 'exito' : 'error');
+              });
+            } else {
+              hint.innerHTML = `Tu pedido <strong>#${d.numero}</strong> quedó registrado (stock reservado 15 min). Responde el chat de WhatsApp para confirmar entrega y pago en efectivo; puedes vaciar el carrito cuando quieras.`;
+              showToast(`Pedido #${d.numero} registrado`);
+            }
           } else {
             hint.innerHTML = 'Tu pedido se abrió en WhatsApp, pero no pudo registrarse en la tienda. Al abrir el chat queda igualmente enviado.';
             showToast('No se pudo registrar el pedido', 'error');
@@ -263,5 +336,149 @@ import config from '../data/config.json';
     window.addEventListener('cart:changed', render);
     cargarCliente();
     render();
+
+    // ---------- Pedidos pendientes offline: cola + reintento ----------
+    const COLA_KEY = 'leonas_pedidos_pendientes_v1';
+
+    function leerCola(): Array<Record<string, unknown>> {
+      try {
+        const raw = localStorage.getItem(COLA_KEY);
+        const l = raw ? JSON.parse(raw) : [];
+        return Array.isArray(l) ? l : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function guardarCola(cola: Array<Record<string, unknown>>) {
+      try {
+        localStorage.setItem(COLA_KEY, JSON.stringify(cola.slice(0, 5)));
+      } catch {
+        /* ignorar */
+      }
+    }
+
+    async function reintentarCola() {
+      const cola = leerCola();
+      if (cola.length === 0 || !navigator.onLine) return;
+      const restantes: Array<Record<string, unknown>> = [];
+      for (const p of cola) {
+        try {
+          const r = await fetch('/api/pedidos', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(p),
+          });
+          const d = await r.json().catch(() => null);
+          if (r.ok && d?.numero) {
+            showToast(`Pedido #${d.numero} enviado (estabas sin conexión)`);
+            try { sessionStorage.setItem('leonas_pedido_ok', String(d.numero)); } catch {}
+            if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+              navigator.serviceWorker.controller.postMessage({ tipo: 'leonas:pedido-ok' });
+            }
+          } else {
+            restantes.push(p);
+          }
+        } catch {
+          restantes.push(p);
+        }
+      }
+      guardarCola(restantes);
+    }
+
+    // Al enviar sin conexión (o si falla la red), encolar para reintentar.
+    const fetchOriginal = window.fetch.bind(window);
+    // (Solo interceptamos /api/pedidos con método POST desde este formulario.)
+    async function enviarPedido(datosPedido: Record<string, unknown>): Promise<Response> {
+      try {
+        return await fetchOriginal('/api/pedidos', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(datosPedido),
+        });
+      } catch (err) {
+        const cola = leerCola();
+        cola.push(datosPedido);
+        guardarCola(cola);
+        try {
+          if ('serviceWorker' in navigator && 'SyncManager' in window) {
+            const reg = await navigator.serviceWorker.ready;
+            await (reg as unknown as { sync: { register: (t: string) => Promise<void> } }).sync.register('leonas-reintentar');
+          }
+        } catch {
+          /* sync no disponible: se reintenta con evento online */
+        }
+        throw err;
+      }
+    }
+
+    window.addEventListener('online', reintentarCola);
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.addEventListener('message', (ev) => {
+        if (ev.data?.tipo === 'leonas:reintentar') reintentarCola();
+      });
+    }
+    // Reintentar al abrir la página (por si volvió la conexión).
+    setTimeout(reintentarCola, 3000);
+
+    // ---------- Carrito abandonado: guardar si no completa el pedido ----------
+    function sessionId(): string {
+      try {
+        let sid = localStorage.getItem('leonas_sid');
+        if (!sid) {
+          sid = crypto.randomUUID();
+          localStorage.setItem('leonas_sid', sid);
+        }
+        return sid;
+      } catch {
+        return 'anonimo';
+      }
+    }
+
+    let guardadoEn = 0;
+    async function guardarAbandonado() {
+      try {
+        if (sessionStorage.getItem('leonas_pedido_ok')) return;
+        const carrito = getCart();
+        if (carrito.length === 0) return;
+        const ahora = Date.now();
+        if (ahora - guardadoEn < 60000) return; // máximo 1 vez por minuto
+        guardadoEn = ahora;
+        await fetch('/api/carrito-abandonado', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            session_id: sessionId(),
+            items: carrito,
+            client_data: { nombre: nombreEl.value.trim(), entrega: entregaEl.value.trim() },
+            total: totalDe(carrito),
+          }),
+        }).catch(() => {});
+      } catch {
+        /* ignorar */
+      }
+    }
+
+    // Guardar cada 90s y al salir, solo si hay carrito y no se completó pedido.
+    setInterval(guardarAbandonado, 90000);
+    window.addEventListener('pagehide', () => {
+      try {
+        if (sessionStorage.getItem('leonas_pedido_ok')) return;
+        const carrito = getCart();
+        if (carrito.length === 0) return;
+        const datos = JSON.stringify({
+          session_id: sessionId(),
+          items: carrito,
+          client_data: { nombre: nombreEl.value.trim(), entrega: entregaEl.value.trim() },
+          total: totalDe(carrito),
+        });
+        // sendBeacon para no bloquear la salida.
+        if (navigator.sendBeacon) {
+          navigator.sendBeacon('/api/carrito-abandonado', new Blob([datos], { type: 'application/json' }));
+        }
+      } catch {
+        /* ignorar */
+      }
+    });
   </script>
 </Base>

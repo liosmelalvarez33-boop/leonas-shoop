@@ -1,8 +1,9 @@
 /* Service worker de Leonas Shoop: guarda el catálogo para verlo sin datos. */
-const CACHE = 'leonas-v2';
+const CACHE = 'leonas-v3';
 const PRECACHE = [
   '/',
   '/catalogo',
+  '/contacto',
   '/manifest.webmanifest',
   '/icons/icon-192.png',
   '/icons/icon-512.png',
@@ -81,6 +82,25 @@ const actualizaciónDeFondo = async (peticion) => {
   return guardado || (await red) || Response.error();
 };
 
+// Reintento de pedidos/carritos guardados sin conexión (el cliente los guarda en
+// localStorage y los reenvía al volver la red; aquí solo avisamos a las pestañas).
+self.addEventListener('sync', (evento) => {
+  if (evento.tag === 'leonas-reintentar') {
+    evento.waitUntil(
+      self.clients.matchAll().then((clientes) => {
+        for (const c of clientes) c.postMessage({ tipo: 'leonas:reintentar' });
+      }),
+    );
+  }
+});
+
+self.addEventListener('message', (evento) => {
+  if (evento.data && evento.data.tipo === 'leonas:pedido-ok') {
+    // Limpiar caché del catálogo para ver stock actualizado.
+    evento.waitUntil(caches.open(CACHE).then((c) => c.delete('/api/catalogo').catch(() => {})));
+  }
+});
+
 self.addEventListener('fetch', (evento) => {
   const url = new URL(evento.request.url);
   if (evento.request.method !== 'GET' || url.origin !== self.location.origin) return;
@@ -96,7 +116,11 @@ self.addEventListener('fetch', (evento) => {
     evento.respondWith(apiPrimero(evento.request));
     return;
   }
-  if (url.pathname.startsWith('/img/') || url.pathname.startsWith('/icons/')) {
+  if (
+    url.pathname.startsWith('/img/') ||
+    url.pathname.startsWith('/icons/') ||
+    url.pathname.startsWith('/_astro/')
+  ) {
     evento.respondWith(actualizaciónDeFondo(evento.request));
     return;
   }

@@ -1,0 +1,36 @@
+---
+// ProductImage: <picture> responsive con WebP/AVIF + fallback.
+// Uso: <ProductImage nombre="camisa-floral-foto1" alt="Camisa floral" tall="800" />
+// Busca en /img/optimizadas/<nombre>-<ancho>.webp/avif/jpg, si no existe usa /img/productos/<nombre>.
+interface Props {
+  nombre: string; // sin extensión, ej: "camisa-floral" o "camisa-floral-foto1"
+  alt: string;
+  tall?: number; // ancho preferido para src principal
+  clase?: string;
+  eager?: boolean;
+}
+
+const { nombre, alt, tall = 800, clase = 'h-full w-full object-cover', eager = false } = Astro.props;
+const base = nombre.replace(/\.[a-z0-9]+$/i, '');
+const esSvgLegacy = nombre.endsWith('.svg');
+const srcFallback = esSvgLegacy ? `/img/productos/${nombre}` : `/img/productos/${nombre}.svg`;
+const opt = (ext: string, w: number) => `/img/optimizadas/${base}-${w}.${ext}`;
+const loading = eager ? 'eager' : 'lazy';
+const fetchPrio = eager ? 'high' : 'auto';
+---
+
+<picture>
+  <source type="image/avif" srcset={`${opt('avif', 400)} 400w, ${opt('avif', 800)} 800w, ${opt('avif', 1200)} 1200w`} sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw" />
+  <source type="image/webp" srcset={`${opt('webp', 400)} 400w, ${opt('webp', 800)} 800w, ${opt('webp', 1200)} 1200w`} sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw" />
+  <img
+    src={opt('jpg', tall)}
+    alt={alt}
+    width="800"
+    height="1000"
+    loading={loading}
+    decoding="async"
+    fetchpriority={fetchPrio}
+    class={clase}
+    onerror={`this.onerror=null;this.src='${srcFallback}'`}
+  />
+</picture>

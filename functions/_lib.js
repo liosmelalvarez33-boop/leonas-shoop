@@ -199,6 +199,12 @@ export function validarPedido(o) {
   if (!esTexto(o.nombre ?? '', 120) || !o.nombre?.trim()) return 'Falta el nombre';
   if (!esTexto(o.entrega ?? '', 200) || !o.entrega?.trim()) return 'Falta el lugar de entrega';
   if (!esTexto(o.notas ?? '', 500)) return 'Notas demasiado largas';
+  if (o.metodo_pago !== undefined && !['efectivo', 'transfermovil'].includes(o.metodo_pago)) {
+    return 'Método de pago no válido';
+  }
+  if (o.telefono !== undefined && o.telefono !== null && !esTexto(String(o.telefono), 20)) {
+    return 'Teléfono no válido';
+  }
   if (!Array.isArray(o.items) || o.items.length < 1 || o.items.length > 40) return 'Artículos no válidos';
   let total = 0;
   for (const it of o.items) {
@@ -209,6 +215,7 @@ export function validarPedido(o) {
     if (!Number.isInteger(cantidad) || cantidad < 1 || cantidad > 99) return 'Cantidad no válida';
     if (it.talla != null && !esTexto(it.talla, 10)) return 'Talla no válida';
     if (it.imagen != null && !/^[A-Za-z0-9._-]{1,80}$/.test(it.imagen)) return 'Imagen no válida';
+    if (it.id != null && !esTexto(String(it.id), 60)) return 'ID de artículo no válido';
     total += precio * cantidad;
   }
   if (Number(o.total ?? -1) !== total) return 'El total no coincide';

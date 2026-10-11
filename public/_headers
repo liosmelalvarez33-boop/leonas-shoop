@@ -1,0 +1,28 @@
+# Seguridad + caché para Cloudflare Pages.
+# https://developers.cloudflare.com/pages/configuration/headers/
+
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' https://wa.me; frame-ancestors 'none'; form-action 'self'
+
+/admin
+  X-Robots-Tag: noindex, nofollow
+  Cache-Control: no-store
+
+/api/*
+  Cache-Control: no-store
+
+/img/optimizadas/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/img/productos/*
+  Cache-Control: public, max-age=86400
+
+/icons/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable

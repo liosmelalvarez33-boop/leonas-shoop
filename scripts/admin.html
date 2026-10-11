@@ -182,19 +182,51 @@
 </header>
 
 <nav class="tabs" aria-label="Secciones del panel">
-  <button class="tab is-active" data-vista="productos">🛍️ Productos</button>
+  <button class="tab is-active" data-vista="dashboard">📊 Resumen</button>
+  <button class="tab" data-vista="productos">🛍️ Productos</button>
   <button class="tab" data-vista="pedidos">📦 Pedidos <span class="num oculto" id="badgePend"></span></button>
+  <button class="tab" data-vista="abandonados">🛒 Abandonados <span class="num oculto" id="badgeAband"></span></button>
   <button class="tab" data-vista="tienda">⚙️ Tienda</button>
 </nav>
 
 <main>
+  <!-- ============ DASHBOARD ============ -->
+  <section id="vista-dashboard">
+    <div class="toolbar">
+      <span class="count" id="dashFuente"></span>
+      <button class="btn" id="btnRecargarDash">↻ Actualizar</button>
+      <a class="btn" href="/api/admin/export?tipo=pedidos">⬇ Pedidos CSV</a>
+      <a class="btn" href="/api/admin/export?tipo=productos">⬇ Productos CSV</a>
+    </div>
+    <div class="grid" id="dashCards" style="grid-template-columns:repeat(auto-fill,minmax(160px,1fr))"></div>
+    <div class="seccion" style="margin-top:18px">
+      <h2>Ventas últimos 30 días</h2>
+      <div id="dashSerie" style="display:flex;align-items:flex-end;gap:3px;height:90px;margin-top:10px"></div>
+    </div>
+    <div style="display:grid;gap:18px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));margin-top:18px">
+      <div class="seccion">
+        <h2>Más vendidos</h2>
+        <div id="dashTop" style="display:grid;gap:8px;font-size:13.5px"></div>
+      </div>
+      <div class="seccion">
+        <h2>Stock bajo (≤2)</h2>
+        <div id="dashStock" style="display:grid;gap:8px;font-size:13.5px"></div>
+      </div>
+      <div class="seccion">
+        <h2>Por método de pago (30d)</h2>
+        <div id="dashMetodo" style="display:grid;gap:8px;font-size:13.5px"></div>
+      </div>
+    </div>
+  </section>
+
   <!-- ============ PRODUCTOS ============ -->
-  <section id="vista-productos">
+  <section id="vista-productos" hidden>
     <div class="toolbar">
       <input type="search" id="buscar" placeholder="Buscar por título o descripción…" />
       <select id="filtroCat"><option value="">Todas las categorías</option></select>
       <span class="count" id="conteo"></span>
       <button class="btn btn-primary" id="btnNuevo">＋ Nuevo producto</button>
+      <a class="btn" href="/api/admin/export?tipo=productos">⬇ CSV</a>
     </div>
     <div class="grid" id="grid"></div>
     <div class="vacio" id="vacio" hidden>
@@ -205,10 +237,21 @@
 
   <!-- ============ PEDIDOS ============ -->
   <section id="vista-pedidos" hidden>
+    <div class="toolbar">
+      <input type="search" id="buscarPed" placeholder="Buscar por nombre, # o lugar…" style="flex:1;min-width:180px;border:1px solid var(--line);border-radius:10px;padding:9px 12px;background:var(--panel)" />
+      <select id="filtroMetodo" style="border:1px solid var(--line);border-radius:10px;padding:9px 12px;background:var(--panel)">
+        <option value="">Todos los pagos</option>
+        <option value="efectivo">Efectivo</option>
+        <option value="transfermovil">Transfermóvil</option>
+      </select>
+      <a class="btn" href="/api/admin/export?tipo=pedidos">⬇ CSV</a>
+    </div>
     <div class="filtros" id="filtrosPedidos">
       <button class="chipf is-active" data-fp="">Todos</button>
       <button class="chipf" data-fp="pendiente">Pendientes</button>
       <button class="chipf" data-fp="confirmado">Confirmados</button>
+      <button class="chipf" data-fp="en_preparacion">En preparación</button>
+      <button class="chipf" data-fp="en_camino">En camino</button>
       <button class="chipf" data-fp="entregado">Entregados</button>
       <button class="chipf" data-fp="cancelado">Cancelados</button>
     </div>
@@ -216,6 +259,19 @@
     <div class="vacio" id="vacioPedidos" hidden>
       <b>Sin pedidos por aquí</b>
       Cuando un cliente envíe su pedido desde la tienda, aparecerá en esta lista.
+    </div>
+  </section>
+
+  <!-- ============ ABANDONADOS ============ -->
+  <section id="vista-abandonados" hidden>
+    <div class="toolbar">
+      <span class="count">Carritos que no llegaron a pedido. Escríbeles por WhatsApp para recuperar la venta.</span>
+      <button class="btn" id="btnRecargarAband">↻ Actualizar</button>
+    </div>
+    <div class="pedidos" id="listaAbandonados"></div>
+    <div class="vacio" id="vacioAbandonados" hidden>
+      <b>Sin carritos abandonados</b>
+      Cuando un cliente añada al carrito y no complete, aparecerá aquí.
     </div>
   </section>
 
@@ -373,13 +429,16 @@
   }
 
   // ---------- Pestañas ----------
+  const VISTAS = ['dashboard', 'productos', 'pedidos', 'abandonados', 'tienda'];
   function setVista(nombre) {
-    ['productos', 'pedidos', 'tienda'].forEach((v) => {
+    VISTAS.forEach((v) => {
       $('#vista-' + v).hidden = v !== nombre;
     });
     document.querySelectorAll('.tab').forEach((t) => t.classList.toggle('is-active', t.dataset.vista === nombre));
     history.replaceState(null, '', '#' + nombre);
+    if (nombre === 'dashboard') cargarDashboard();
     if (nombre === 'pedidos') renderPedidos();
+    if (nombre === 'abandonados') cargarAbandonados();
     if (nombre === 'tienda') pintarTienda();
   }
   document.querySelectorAll('.tab').forEach((t) => t.addEventListener('click', () => setVista(t.dataset.vista)));
@@ -401,7 +460,46 @@
     render();
     actualizarBadge();
     const h = location.hash.replace('#', '');
-    if (['pedidos', 'tienda'].includes(h)) setVista(h);
+    if (VISTAS.includes(h) && h !== 'productos') setVista(h);
+    else cargarDashboard();
+  }
+
+  // ---------- Dashboard ----------
+  async function cargarDashboard() {
+    try {
+      const d = await api('/api/admin/dashboard');
+      $('#dashFuente').textContent = `Fuente: ${d.fuente === 'd1' ? 'D1' : 'KV'} · ${new Date().toLocaleTimeString('es')}`;
+      const cards = [
+        ['Hoy', `${d.hoy.pedidos} pedidos`, `$${Number(d.hoy.ingresos).toLocaleString('es')}`],
+        ['7 días', `${d.semana.pedidos} pedidos`, `$${Number(d.semana.ingresos).toLocaleString('es')}`],
+        ['30 días', `${d.mes.pedidos} pedidos`, `$${Number(d.mes.ingresos).toLocaleString('es')}`],
+        ['Ticket prom.', `$${Number(d.ticketPromedio).toLocaleString('es')}`, `${d.pendientes} pendientes`],
+      ];
+      $('#dashCards').innerHTML = cards.map(([t, a, b]) =>
+        `<div class="card"><div class="body"><div class="tit" style="font-size:12px;color:var(--muted)">${t}</div><div style="font-size:20px;font-weight:800">${esc(a)}</div><div style="font-size:14px;font-weight:700;color:var(--brand-700)">${esc(b)}</div></div></div>`
+      ).join('');
+      const serie = d.serie30d || [];
+      const max = Math.max(1, ...serie.map((x) => x.ingresos));
+      $('#dashSerie').innerHTML = serie.length
+        ? serie.map((x) => `<div title="${x.dia}: $${Number(x.ingresos).toLocaleString('es')} (${x.pedidos})" style="flex:1;min-width:4px;background:var(--brand-600);border-radius:3px 3px 0 0;height:${Math.max(4, Math.round((x.ingresos / max) * 80))}px;opacity:.85"></div>`).join('')
+        : '<span class="count">Sin datos de serie (fuente KV o sin ventas).</span>';
+      $('#dashTop').innerHTML = (d.top || []).length
+        ? d.top.map((t) => `<div style="display:flex;justify-content:space-between;gap:8px"><span>${esc(t.titulo || t.product_id || '')}</span><b>${t.unidades_vendidas} u · $${Number(t.ingresos_totales).toLocaleString('es')}</b></div>`).join('')
+        : '<span class="count">Sin ventas aún.</span>';
+      $('#dashStock').innerHTML = (d.stockBajo || []).length
+        ? d.stockBajo.map((s) => `<div style="display:flex;justify-content:space-between;gap:8px"><span>${esc(s.titulo)} ${s.talla ? `(talla ${esc(s.talla)})` : ''}</span><b style="color:var(--danger)">${s.stock} left</b></div>`).join('')
+        : '<span class="count">Stock OK.</span>';
+      $('#dashMetodo').innerHTML = (d.porMetodo || []).length
+        ? d.porMetodo.map((m) => `<div style="display:flex;justify-content:space-between;gap:8px"><span>${m.metodo === 'transfermovil' ? 'Transfermóvil' : 'Efectivo'}</span><b>${m.pedidos} · $${Number(m.ingresos).toLocaleString('es')}</b></div>`).join('')
+        : '<span class="count">Sin datos por método.</span>';
+      const ab = $('#badgeAband');
+      if (ab) {
+        ab.textContent = d.abandonados || '';
+        ab.classList.toggle('oculto', !(d.abandonados > 0));
+      }
+    } catch (e) {
+      $('#dashFuente').textContent = 'No pude cargar el resumen: ' + e.message;
+    }
   }
 
   // ---------- Productos ----------
@@ -432,6 +530,7 @@
             </div>
             <div class="acciones">
               <button class="btn" data-editar="${esc(p.id)}">Editar</button>
+              <button class="btn" data-duplicar="${esc(p.id)}" title="Crear copia">Copiar</button>
               <button class="btn btn-danger" data-eliminar="${esc(p.id)}">Eliminar</button>
             </div>
           </div>
@@ -440,10 +539,10 @@
       .join('');
   }
 
-  function abrirDialogo(producto) {
+  function abrirDialogo(producto, comoNuevo) {
     const f = $('#form');
     fotosNuevas = [];
-    if (producto) {
+    if (producto && !comoNuevo) {
       modo = 'editar';
       $('#dlgTitulo').textContent = 'Editar producto';
       f.titulo.value = producto.titulo;
@@ -507,9 +606,18 @@
   $('#grid').addEventListener('click', (e) => {
     const ed = e.target.dataset.editar;
     const el = e.target.dataset.eliminar;
+    const du = e.target.dataset.duplicar;
     if (ed) {
       const p = datos.productos.find((x) => x.id === ed);
       if (p) abrirDialogo(p);
+    }
+    if (du) {
+      const p = datos.productos.find((x) => x.id === du);
+      if (!p) return;
+      const copia = { ...p, id: `${p.id}-copia`, titulo: `${p.titulo} (copia)`, estado: 'disponible', destacado: false };
+      abrirDialogo(copia, true);
+      toast('Revisa el ID y guarda la copia');
+      return;
     }
     if (el) {
       const p = datos.productos.find((x) => x.id === el);
@@ -578,25 +686,43 @@
   });
 
   // ---------- Pedidos ----------
-  const ETIQUETA_ESTADO = { pendiente: 'Pendiente', confirmado: 'Confirmado', entregado: 'Entregado', cancelado: 'Cancelado' };
+  const ETIQUETA_ESTADO = { pendiente: 'Pendiente', confirmado: 'Confirmado', en_preparacion: 'En preparación', en_camino: 'En camino', entregado: 'Entregado', cancelado: 'Cancelado' };
+  const ESTADOS_TODOS = ['pendiente', 'confirmado', 'en_preparacion', 'en_camino', 'entregado', 'cancelado'];
+  let filtroMetodo = '';
+  let buscarPed = '';
 
   function renderPedidos() {
-    const lista = datos.pedidos.filter((p) => !filtroPedidos || p.estado === filtroPedidos);
+    const lista = datos.pedidos.filter((p) =>
+      (!filtroPedidos || p.estado === filtroPedidos) &&
+      (!filtroMetodo || (p.metodo_pago || 'efectivo') === filtroMetodo) &&
+      (!buscarPed || `${p.n} ${p.nombre} ${p.entrega}`.toLowerCase().includes(buscarPed))
+    );
     $('#vacioPedidos').hidden = datos.pedidos.length > 0;
     $('#listaPedidos').innerHTML = lista.map((p) => {
       const fecha = new Date(p.fecha);
       const fechaTxt = fecha.toLocaleDateString('es', { day: 'numeric', month: 'short' }) + ' · ' + fecha.toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
-      const items = p.items.map((it) => {
+      const items = (p.items || []).map((it) => {
         const det = it.talla ? ` (talla ${it.talla})` : '';
         return `<li><span>${esc(it.titulo)}${esc(det)} <span class="q">×${it.cantidad}</span></span><span>${datos.simbolo}${(it.precio * it.cantidad).toLocaleString('es')}</span></li>`;
       }).join('');
-      const botones = ['pendiente', 'confirmado', 'entregado', 'cancelado'].map((s) =>
-        `<button class="estado-btn ${p.estado === s ? 'is-active' : ''}" data-estado="${s}" data-id="${esc(p.id)}">${ETIQUETA_ESTADO[s]}</button>`,
+      const botones = ESTADOS_TODOS.map((s) =>
+        `<button class="estado-btn ${p.estado === s ? 'is-active' : ''}" data-estado="${s}" data-id="${esc(p.id)}">${ETIQUETA_ESTADO[s] || s}</button>`,
       ).join('');
+      const metodo = p.metodo_pago === 'transfermovil' ? '<span class="badge azul">Transfermóvil</span>' : '<span class="badge gris">Efectivo</span>';
+      const pago = p.metodo_pago === 'transfermovil'
+        ? (p.pago_confirmado
+          ? '<span class="badge verde">Pago ✓</span>'
+          : `<button class="btn" data-pago="${esc(p.id)}" style="font-size:12px;padding:5px 10px">Confirmar pago</button>`)
+        : '';
+      const waMsg = encodeURIComponent(`Hola ${p.nombre}, soy de Leonas Shoop. Tu pedido #${p.n} ($${Number(p.total).toLocaleString('es')}) está ${ETIQUETA_ESTADO[p.estado] || p.estado}. Coordinamos entrega en: ${p.entrega}.`);
+      const waNum = (datos.config && datos.config.whatsapp) || '';
       return `<article class="pedido" data-pid="${esc(p.id)}">
         <div class="phead">
-          <span class="pnum">Pedido #${p.n}</span>
+          <span class="pnum">Pedido #${p.n ?? p.numero}</span>
           <span class="pfecha">${fechaTxt}</span>
+          ${metodo} ${pago}
+          <span style="flex:1"></span>
+          <button class="btn" data-ticket="${esc(p.id)}" title="Imprimir ticket" style="font-size:12px;padding:5px 10px">🧾</button>
           <button class="pdel" data-del="${esc(p.id)}" title="Eliminar pedido">🗑</button>
         </div>
         <div class="pcliente">${esc(p.nombre)}</div>
@@ -605,6 +731,9 @@
         <div class="ptotal"><span>Total</span><span>${datos.simbolo}${Number(p.total).toLocaleString('es')}</span></div>
         ${p.notas ? `<div class="pnotas">📝 ${esc(p.notas)}</div>` : ''}
         <div class="pestados">${botones}</div>
+        <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
+          <a class="btn btn-wa" style="font-size:12.5px;padding:7px 12px;text-decoration:none" target="_blank" rel="noopener" href="https://wa.me/${esc(waNum)}?text=${waMsg}">WhatsApp cliente</a>
+        </div>
       </article>`;
     }).join('');
   }
@@ -617,11 +746,30 @@
     renderPedidos();
   });
 
+  $('#buscarPed')?.addEventListener('input', (e) => { buscarPed = e.target.value.trim().toLowerCase(); renderPedidos(); });
+  $('#filtroMetodo')?.addEventListener('change', (e) => { filtroMetodo = e.target.value; renderPedidos(); });
+
+  function ticketTexto(p) {
+    const lineas = [
+      `LEONAS SHOOP - Pedido #${p.n ?? p.numero}`,
+      `${new Date(p.fecha).toLocaleString('es')}`,
+      `Cliente: ${p.nombre}`,
+      `Entrega: ${p.entrega}`,
+      `Pago: ${p.metodo_pago === 'transfermovil' ? 'Transfermóvil' : 'Efectivo'}${p.pago_confirmado ? ' (confirmado)' : ''}`,
+      '---',
+      ...(p.items || []).map((it) => `${it.titulo}${it.talla ? ` (${it.talla})` : ''} x${it.cantidad} = $${(it.precio * it.cantidad).toLocaleString('es')}`),
+      '---',
+      `TOTAL: $${Number(p.total).toLocaleString('es')} ${datos.moneda || 'CUP'}`,
+    ];
+    if (p.notas) lineas.push(`Notas: ${p.notas}`);
+    return lineas.join('\n');
+  }
+
   $('#listaPedidos').addEventListener('click', async (e) => {
     const del = e.target.dataset.del;
     if (del) {
       const p = datos.pedidos.find((x) => x.id === del);
-      if (p && confirm(`¿Eliminar el pedido #${p.n} de ${p.nombre}?`)) {
+      if (p && confirm(`¿Eliminar el pedido #${p.n} de ${p.nombre}?${p.estado !== 'cancelado' ? '\n(Se devuelve el stock reservado.)' : ''}`)) {
         try {
           await api('/api/admin/pedidos', { id: del, accion: 'eliminar' });
           toast('Pedido eliminado');
@@ -629,6 +777,27 @@
           renderPedidos();
         } catch (err) { toast(err.message, true); }
       }
+      return;
+    }
+    const pagoBtn = e.target.closest('[data-pago]');
+    if (pagoBtn) {
+      try {
+        await api('/api/admin/pedidos', { id: pagoBtn.dataset.pago, accion: 'pago', confirmado: true });
+        const p = datos.pedidos.find((x) => x.id === pagoBtn.dataset.pago);
+        if (p) p.pago_confirmado = true;
+        renderPedidos();
+        toast('Pago confirmado ✓');
+      } catch (err) { toast(err.message, true); }
+      return;
+    }
+    const tick = e.target.closest('[data-ticket]');
+    if (tick) {
+      const p = datos.pedidos.find((x) => x.id === tick.dataset.ticket);
+      if (!p) return;
+      const w = window.open('', '_blank', 'width=400,height=600');
+      if (!w) { toast('Permite ventanas emergentes para imprimir', true); return; }
+      w.document.write(`<pre style="font-family:monospace;font-size:13px;padding:20px">${esc(ticketTexto(p))}</pre><script>window.print()<\/script>`);
+      w.document.close();
       return;
     }
     const btn = e.target.closest('[data-estado]');
@@ -639,7 +808,7 @@
         if (p) p.estado = btn.dataset.estado;
         actualizarBadge();
         renderPedidos();
-        toast('Estado: ' + ETIQUETA_ESTADO[btn.dataset.estado]);
+        toast('Estado: ' + (ETIQUETA_ESTADO[btn.dataset.estado] || btn.dataset.estado));
       } catch (err) { toast(err.message, true); }
     }
   });
@@ -746,6 +915,40 @@
       await cargar();
     } catch (err) { toast(err.message, true); }
   });
+
+  // ---------- Abandonados ----------
+  async function cargarAbandonados() {
+    try {
+      const d = await api('/api/carrito-abandonado');
+      const lista = d.carritos || [];
+      $('#vacioAbandonados').hidden = lista.length > 0;
+      $('#listaAbandonados').innerHTML = lista.map((c) => {
+        const fecha = c.abandoned_at ? new Date(c.abandoned_at).toLocaleString('es', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '';
+        const items = (c.items || []).map((it) => `<li><span>${esc(it.titulo)}${it.talla ? ` (talla ${esc(it.talla)})` : ''} <span class="q">×${it.cantidad}</span></span><span>${datos.simbolo}${(it.precio * it.cantidad).toLocaleString('es')}</span></li>`).join('');
+        const nombre = (c.client_data && c.client_data.nombre) || 'Cliente sin nombre';
+        const entrega = (c.client_data && c.client_data.entrega) || 'Sin dirección';
+        const waMsg = encodeURIComponent(`Hola ${nombre}, soy de Leonas Shoop. Vimos que dejaste ${c.items.length} artículo(s) en tu carrito ($${Number(c.total).toLocaleString('es')}). ¿Te ayudo a completar tu pedido?`);
+        const waNum = (datos.config && datos.config.whatsapp) || '';
+        return `<article class="pedido">
+          <div class="phead"><span class="pnum">${esc(nombre)}</span><span class="pfecha">${esc(fecha)}</span></div>
+          <div class="pentrega">📍 ${esc(entrega)}</div>
+          <ul class="pitems">${items}</ul>
+          <div class="ptotal"><span>Total</span><span>${datos.simbolo}${Number(c.total).toLocaleString('es')}</span></div>
+          <div style="margin-top:10px"><a class="btn btn-wa" style="font-size:13px;text-decoration:none" target="_blank" rel="noopener" href="https://wa.me/${esc(waNum)}?text=${waMsg}">Recuperar por WhatsApp</a></div>
+        </article>`;
+      }).join('');
+      const ab = $('#badgeAband');
+      if (ab) {
+        ab.textContent = lista.length || '';
+        ab.classList.toggle('oculto', lista.length === 0);
+      }
+    } catch (e) {
+      toast('No pude cargar abandonados: ' + e.message, true);
+    }
+  }
+
+  $('#btnRecargarAband')?.addEventListener('click', cargarAbandonados);
+  $('#btnRecargarDash')?.addEventListener('click', cargarDashboard);
 
   // ---------- Salir ----------
   $('#btnSalir').addEventListener('click', async () => {

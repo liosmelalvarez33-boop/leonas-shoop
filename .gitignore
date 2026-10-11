@@ -22,6 +22,8 @@ pnpm-debug.log*
 .netlify
 .wrangler
 scripts/.products.backup.json
+test-results/
+playwright-report/
 
 # proyecto Android generado (regenerable con scripts/build-apk.sh)
 apk/android/

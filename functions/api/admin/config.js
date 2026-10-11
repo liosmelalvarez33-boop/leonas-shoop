@@ -37,6 +37,20 @@ export async function onRequestPost({ request, env }) {
   const fallo = validarConfig(nueva);
   if (fallo) return error(fallo);
 
+  // Fase 1: guardar en D1 si existe, siempre respaldar en KV.
+  if (env.DB && typeof env.DB.batch === 'function') {
+    try {
+      const stmts = [];
+      for (const [k, v] of Object.entries(nueva)) {
+        const valor = typeof v === 'object' ? JSON.stringify(v) : String(v ?? '');
+        stmts.push(env.DB.prepare('INSERT INTO site_config (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value').bind(k, valor));
+      }
+      await env.DB.batch(stmts);
+    } catch {
+      /* si D1 falla, KV sigue siendo la fuente */
+    }
+  }
+
   await env.DATOS.put('config', JSON.stringify(nueva));
   return json({ ok: true, config: nueva });
 }

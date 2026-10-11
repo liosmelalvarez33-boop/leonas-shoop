@@ -10,7 +10,7 @@ interface Props {
   description?: string;
   image?: string;
   type?: string;
-  jsonLd?: Record<string, unknown>;
+  jsonLd?: Record<string, unknown> | Array<Record<string, unknown>>;
 }
 
 const {

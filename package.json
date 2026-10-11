@@ -8,7 +8,17 @@
     "build": "astro build",
     "preview": "astro preview",
     "placeholders": "node scripts/gen-placeholders.mjs",
-    "icons": "node scripts/gen-icons.mjs"
+    "icons": "node scripts/gen-icons.mjs",
+    "imagenes": "node scripts/process-images.mjs",
+    "db:migrate:local": "wrangler d1 migrations apply leonas-shoop --local",
+    "db:seed:local": "wrangler d1 execute leonas-shoop --local --file=./scripts/seed-d1.sql",
+    "db:migrate:remote": "wrangler d1 migrations apply leonas-shoop --remote",
+    "db:seed:remote": "wrangler d1 execute leonas-shoop --remote --file=./scripts/seed-d1.sql",
+    "check": "astro check",
+    "test": "npm run test:unit && npm run test:e2e",
+    "test:unit": "vitest run",
+    "test:e2e": "playwright test",
+    "test:e2e:update": "playwright test --update-snapshots"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.4",
@@ -18,8 +28,10 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
+    "@playwright/test": "^1.64.0",
     "sharp": "^0.35.5",
     "typescript": "^6.0.3",
+    "vitest": "^5.0.3",
     "wrangler": "^4.148.0"
   },
   "optionalDependencies": {

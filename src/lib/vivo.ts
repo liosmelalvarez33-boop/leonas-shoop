@@ -138,7 +138,7 @@ export function tarjetaProducto(p: Producto, cfg: ConfigViva): string {
     : '';
   const primera = p.imagenes[0] ? `/img/productos/${encodeURIComponent(p.imagenes[0])}` : '/img/logo.svg';
   return `<article class="group card relative flex flex-col transition duration-200 hover:-translate-y-1 hover:border-brand-400 hover:shadow-lg hover:shadow-black/10${agotado ? ' opacity-75' : ''}">
-  <a href="/catalogo?p=${encodeURIComponent(p.id)}" class="flex flex-1 flex-col focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">
+  <a href="/producto/${encodeURIComponent(p.id)}" class="flex flex-1 flex-col focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">
     <div class="relative aspect-[4/5] overflow-hidden bg-sunken">
       <img src="${primera}" alt="${escapear(p.titulo)}" width="800" height="1000" loading="lazy" decoding="async" class="h-full w-full object-cover transition duration-300 group-hover:scale-105" />
       <div class="absolute left-3 top-3 flex flex-col items-start gap-1.5">
