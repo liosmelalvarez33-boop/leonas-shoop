@@ -1,7 +1,7 @@
 // Carritos abandonados: el frontend guarda el carrito si el usuario no completa el pedido.
 // POST /api/carrito-abandonado { session_id, items, client_data, total } -> guarda
 // GET /api/carrito-abandonado (admin) -> lista últimos 50
-import { json, error, leerJson, exigirSesion, esTexto } from '../_lib.js';
+import { json, error, leerJson, exigirSesion } from '../_lib.js';
 
 export async function onRequestPost({ request, env }) {
   let cuerpo;

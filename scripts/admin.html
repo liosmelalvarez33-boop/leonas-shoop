@@ -201,6 +201,11 @@
     </div>
     <div class="grid" id="dashCards" style="grid-template-columns:repeat(auto-fill,minmax(160px,1fr))"></div>
     <div class="seccion" style="margin-top:18px">
+      <h2>Embudo (30 días)</h2>
+      <p class="ayuda">Visitas → búsquedas → carrito → pedido. Si se cae en un paso, ahí está la mejora.</p>
+      <div id="dashEmbudo" style="display:flex;gap:8px;flex-wrap:wrap;font-size:13px"></div>
+    </div>
+    <div class="seccion" style="margin-top:18px">
       <h2>Ventas últimos 30 días</h2>
       <div id="dashSerie" style="display:flex;align-items:flex-end;gap:3px;height:90px;margin-top:10px"></div>
     </div>
@@ -504,6 +509,11 @@
       $('#dashStock').innerHTML = (d.stockBajo || []).length
         ? d.stockBajo.map((s) => `<div style="display:flex;justify-content:space-between;gap:8px"><span>${esc(s.titulo)} ${s.talla ? `(talla ${esc(s.talla)})` : ''}</span><b style="color:var(--danger)">${s.stock} left</b></div>`).join('')
         : '<span class="count">Stock OK.</span>';
+      const emb = d.embudo || {};
+      const pasos = [['page_view', 'Visitas'], ['search', 'Búsquedas'], ['cart_add', 'Al carrito'], ['checkout_start', 'Checkout'], ['checkout_complete', 'Pedidos'], ['tm_opened', 'TM abierto']];
+      $('#dashEmbudo').innerHTML = pasos.map(([k, t]) =>
+        `<span class="badge" style="font-size:12px;padding:6px 12px">${t}: <b>${emb[k] || 0}</b></span>`
+      ).join('') || '<span class="count">Sin eventos aún.</span>';
       $('#dashMetodo').innerHTML = (d.porMetodo || []).length
         ? d.porMetodo.map((m) => `<div style="display:flex;justify-content:space-between;gap:8px"><span>${m.metodo === 'transfermovil' ? 'Transfermóvil' : 'Efectivo'}</span><b>${m.pedidos} · $${Number(m.ingresos).toLocaleString('es')}</b></div>`).join('')
         : '<span class="count">Sin datos por método.</span>';

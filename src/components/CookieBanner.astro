@@ -1,0 +1,39 @@
+---
+// Aviso de almacenamiento esencial (sin rastreo). Se oculta al aceptar.
+---
+
+<div
+  id="aviso-cookies"
+  class="fixed bottom-4 left-1/2 z-[70] hidden w-[min(34rem,calc(100vw-2rem))] -translate-x-1/2 rounded-2xl border border-line bg-panel p-4 text-sm shadow-2xl shadow-black/25"
+  role="status"
+>
+  <p class="leading-relaxed text-fg-muted">
+    <strong class="text-fg">Usamos solo lo esencial:</strong> carrito, favoritos y tema se guardan en
+    tu celular. Sin publicidad ni rastreo. <a href="/privacidad" class="font-semibold text-accent hover:underline">Privacidad</a>
+  </p>
+  <button
+    type="button"
+    id="aviso-cookies-ok"
+    class="btn-base btn-dark mt-3 w-full sm:w-auto"
+  >
+    Entendido
+  </button>
+</div>
+
+<script>
+  const KEY = 'leonas_shoop_cookies_v1';
+  const aviso = document.getElementById('aviso-cookies');
+  try {
+    if (!localStorage.getItem(KEY)) aviso?.classList.remove('hidden');
+  } catch {
+    /* sin almacenamiento: no mostrar */
+  }
+  document.getElementById('aviso-cookies-ok')?.addEventListener('click', () => {
+    try {
+      localStorage.setItem(KEY, '1');
+    } catch {
+      /* ignorar */
+    }
+    aviso?.classList.add('hidden');
+  });
+</script>

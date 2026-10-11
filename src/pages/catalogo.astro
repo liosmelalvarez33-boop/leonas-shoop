@@ -180,6 +180,7 @@ const datosBase = JSON.stringify({ productos, config: configJson }).replace(/</g
     import type { Producto } from '../lib/types';
     import { detalleHTML, montarDetalle } from '../lib/detalle';
     import { showToast } from '../scripts/toast';
+    import { track } from '../lib/analytics';
 
     const grid = document.getElementById('grid') as HTMLDivElement;
     const vacio = document.getElementById('vacio') as HTMLDivElement;
@@ -362,7 +363,15 @@ const datosBase = JSON.stringify({ productos, config: configJson }).replace(/</g
     if (params.get('condicion')) selCondicion.value = params.get('condicion') ?? '';
     if (params.get('q')) buscar.value = params.get('q') ?? '';
 
-    buscar.addEventListener('input', aplicar);
+    let buscaTimer: ReturnType<typeof setTimeout>;
+    buscar.addEventListener('input', () => {
+      aplicar();
+      clearTimeout(buscaTimer);
+      const q = buscar.value.trim();
+      if (q.length >= 3) {
+        buscaTimer = setTimeout(() => track('search'), 1200);
+      }
+    });
     selCategoria.addEventListener('change', aplicar);
     selCondicion.addEventListener('change', aplicar);
     selOrden.addEventListener('change', aplicar);

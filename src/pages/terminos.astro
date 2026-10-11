@@ -1,0 +1,66 @@
+---
+import Base from '../layouts/Base.astro';
+import config from '../data/config.json';
+---
+
+<Base
+  title="Términos del servicio"
+  description={`Términos de compra en ${config.nombre}: pedidos, entregas, pagos y devoluciones.`}
+>
+  <div class="mx-auto max-w-3xl px-4 py-10 sm:px-6">
+    <span class="kicker">Legal</span>
+    <h1 class="mt-2 text-3xl font-extrabold tracking-tight text-fg">Términos del servicio</h1>
+
+    <div class="prose-legal mt-6 space-y-5 text-[15px] leading-relaxed text-fg-muted">
+      <section>
+        <h2>1. Cómo comprar</h2>
+        <p>
+          Elige tus artículos en el catálogo, añádelos al carrito y envía tu pedido por WhatsApp al
+          <strong>{config.whatsappVisible}</strong>. El pedido queda registrado con un número y tu
+          stock reservado por 15 minutos. Confirmamos disponibilidad, lugar de entrega y pago por chat
+          antes de cerrar la venta.
+        </p>
+      </section>
+      <section>
+        <h2>2. Precios y pagos</h2>
+        <p>
+          Precios en {config.moneda} (CUP), impuestos incluidos. Aceptamos {config.pagos} y pago por
+          Transfermóvil al número indicado en el carrito. El pedido con Transfermóvil se confirma al
+          recibir el comprobante.
+        </p>
+      </section>
+      <section>
+        <h2>3. Entregas</h2>
+        <p>{config.entregas} Horario de atención: {config.horario}. Coordinamos día y hora por WhatsApp.</p>
+      </section>
+      <section>
+        <h2>4. Segunda mano</h2>
+        <p>
+          Revisamos cada pieza y describimos su estado real con fotos. Si necesitas más fotos o medidas
+          exactas, las enviamos por WhatsApp antes de comprar, sin compromiso.
+        </p>
+      </section>
+      <section>
+        <h2>5. Cambios y devoluciones</h2>
+        <p>
+          Tienes 48 horas tras la entrega para cambios por talla o defecto no descrito, con el artículo
+          sin usar y con etiquetas. Escríbenos por WhatsApp con tu número de pedido. No hay devolución
+          de dinero en efectivo por compras conformes ya entregadas; ofrecemos cambio por otro artículo
+          o crédito en tienda.
+        </p>
+      </section>
+      <section>
+        <h2>6. Contacto</h2>
+        <p>
+          {config.nombre} · {config.ubicacion} · WhatsApp {config.whatsappVisible} ·
+          {config.horario}.
+        </p>
+      </section>
+    </div>
+  </div>
+
+  <style>
+    .prose-legal h2 { font-size: 1.05rem; font-weight: 800; color: var(--fg); margin-bottom: .3rem; }
+    .prose-legal strong { color: var(--fg); }
+  </style>
+</Base>

@@ -3,6 +3,7 @@ import '../styles/global.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import WhatsAppFab from '../components/WhatsAppFab.astro';
+import CookieBanner from '../components/CookieBanner.astro';
 import config from '../data/config.json';
 
 interface Props {
@@ -73,6 +74,17 @@ const ogImage = new URL(image ?? '/img/og-cover.png', Astro.site);
 
     <link rel="sitemap" href="/sitemap-index.xml" />
 
+    {/* Cloudflare Web Analytics (opcional): define PUBLIC_CF_BEACON_TOKEN en el entorno */}
+    {
+      import.meta.env.PUBLIC_CF_BEACON_TOKEN && (
+        <script
+          defer
+          src="https://static.cloudflareinsights.com/beacon.min.js"
+          data-cf-beacon={`{"token": "${import.meta.env.PUBLIC_CF_BEACON_TOKEN}"}`}
+        />
+      )
+    }
+
     {
       jsonLd && (
         <script
@@ -91,6 +103,7 @@ const ogImage = new URL(image ?? '/img/og-cover.png', Astro.site);
     </main>
     <Footer />
     <WhatsAppFab />
+    <CookieBanner />
 
     <script>
       const elementos = document.querySelectorAll<HTMLElement>('[data-reveal]');
@@ -154,6 +167,11 @@ const ogImage = new URL(image ?? '/img/og-cover.png', Astro.site);
           precio: Number(b.dataset.precio || 0),
           imagen: b.dataset.imagen || 'logo.svg',
         });
+        if (added) {
+          import('../lib/analytics').then(({ track }) =>
+            track('fav_add', { producto_id: b.dataset.fav || '' }),
+          ).catch(() => {});
+        }
         showToast(added ? 'Guardado en favoritos' : 'Quitado de favoritos');
         pintarFavs();
       });
@@ -163,6 +181,12 @@ const ogImage = new URL(image ?? '/img/og-cover.png', Astro.site);
       } else {
         pintarFavs();
       }
+    </script>
+
+    <script>
+      // Analítica propia: page_view (una vez por página).
+      import { track } from '../lib/analytics';
+      track('page_view');
     </script>
 
     <script>

@@ -17,7 +17,7 @@ export async function onRequestGet({ request, env }) {
       const hace7 = new Date(Date.now() - 7 * 86400000).toISOString().slice(0, 10);
       const hace30 = new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10);
 
-      const [pedHoy, ped7, ped30, top, stockBajo, pend, ing30, porMetodo, abandonados] = await Promise.all([
+      const [pedHoy, ped7, ped30, top, stockBajo, pend, ing30, porMetodo, abandonados, embudo] = await Promise.all([
         env.DB.prepare(`SELECT COUNT(*) as n, COALESCE(SUM(total),0) as t FROM orders WHERE date(fecha) = ? AND estado != 'cancelado'`).bind(hoy).first(),
         env.DB.prepare(`SELECT COUNT(*) as n, COALESCE(SUM(total),0) as t FROM orders WHERE date(fecha) >= ? AND estado != 'cancelado'`).bind(hace7).first(),
         env.DB.prepare(`SELECT COUNT(*) as n, COALESCE(SUM(total),0) as t FROM orders WHERE date(fecha) >= ? AND estado != 'cancelado'`).bind(hace30).first(),
@@ -27,6 +27,7 @@ export async function onRequestGet({ request, env }) {
         env.DB.prepare(`SELECT date(fecha) as dia, COUNT(*) as pedidos, SUM(total) as ingresos FROM orders WHERE date(fecha) >= ? AND estado != 'cancelado' GROUP BY date(fecha) ORDER BY dia ASC`).bind(hace30).all().catch(() => ({ results: [] })),
         env.DB.prepare(`SELECT metodo_pago, COUNT(*) as n, SUM(total) as t FROM orders WHERE date(fecha) >= ? AND estado != 'cancelado' GROUP BY metodo_pago`).bind(hace30).all().catch(() => ({ results: [] })),
         env.DB.prepare(`SELECT COUNT(*) as n FROM abandoned_carts WHERE recovered_at IS NULL`).first().catch(() => ({ n: 0 })),
+        env.DB.prepare(`SELECT tipo, COUNT(*) as n FROM eventos WHERE creada_en >= date('now', '-30 days') GROUP BY tipo`).all().catch(() => ({ results: [] })),
       ]);
 
       return json({
@@ -39,6 +40,7 @@ export async function onRequestGet({ request, env }) {
         abandonados: abandonados?.n ?? 0,
         porMetodo: (porMetodo.results || []).map((r) => ({ metodo: r.metodo_pago, pedidos: r.n, ingresos: aPesos(r.t) })),
         top: (top.results || []).map((r) => ({ ...r, ingresos_totales: aPesos(r.ingresos_totales) })),
+        embudo: Object.fromEntries((embudo.results || []).map((r) => [r.tipo, r.n])),
         stockBajo: stockBajo.results || [],
         serie30d: (ing30.results || []).map((r) => ({ dia: r.dia, pedidos: r.pedidos, ingresos: aPesos(r.ingresos) })),
       });

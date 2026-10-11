@@ -127,6 +127,7 @@ import config from '../data/config.json';
     import { formatPrice } from '../lib/format';
     import { showToast } from '../scripts/toast';
     import { transfermovilLink, datosTransfermovilTexto, copiarTexto, type MetodoPago } from '../lib/payments';
+    import { track } from '../lib/analytics';
 
     const vacio = document.getElementById('cart-empty') as HTMLDivElement;
     const vista = document.getElementById('cart-view') as HTMLDivElement;
@@ -260,10 +261,13 @@ import config from '../data/config.json';
       // WhatsApp se abre en el mismo gesto (para que el navegador no lo bloquee).
       window.open(waLink(mensaje), '_blank', 'noopener');
 
+      track('checkout_start', { monto: total, metodo: metodo_pago });
+
       // Si eligió Transfermóvil, intentar abrir la app con los datos (no bloquea).
       if (metodo_pago === 'transfermovil') {
         try {
           const link = transfermovilLink({ monto: total, concepto: `Pedido Leonas ${nombre}`.slice(0, 60) });
+          track('tm_opened', { monto: total });
           setTimeout(() => window.open(link, '_blank', 'noopener'), 600);
         } catch {
           /* si falla, el usuario copia los datos del hint */
@@ -290,6 +294,7 @@ import config from '../data/config.json';
           if (d?.numero) {
             // Pedido OK: marcar carrito como convertido (no guardar como abandonado).
             try { sessionStorage.setItem('leonas_pedido_ok', String(d.numero)); } catch {}
+            track('checkout_complete', { pedido_id: d.id, monto: total, metodo: metodo_pago });
             if (metodo_pago === 'transfermovil') {
               const concepto = `Pedido #${d.numero} Leonas`;
               const datos = datosTransfermovilTexto({ monto: total, concepto });

@@ -1,0 +1,49 @@
+---
+import Base from '../layouts/Base.astro';
+import config from '../data/config.json';
+---
+
+<Base
+  title="Cambios y devoluciones"
+  description={`Política de cambios y devoluciones de ${config.nombre}: 48 horas, sin usar y con etiquetas.`}
+>
+  <div class="mx-auto max-w-3xl px-4 py-10 sm:px-6">
+    <span class="kicker">Legal</span>
+    <h1 class="mt-2 text-3xl font-extrabold tracking-tight text-fg">Cambios y devoluciones</h1>
+
+    <div class="prose-legal mt-6 space-y-5 text-[15px] leading-relaxed text-fg-muted">
+      <section>
+        <h2>48 horas</h2>
+        <p>
+          Tienes 48 horas tras la entrega para pedir cambio por talla o por defecto no descrito en la
+          publicación. El artículo debe estar sin usar, sin lavar y con etiquetas.
+        </p>
+      </section>
+      <section>
+        <h2>Cómo pedirlo</h2>
+        <p>
+          Escríbenos por WhatsApp al {config.whatsappVisible} con tu número de pedido y fotos del
+          artículo. Coordinamos el cambio en persona, en {config.ubicacion}.
+        </p>
+      </section>
+      <section>
+        <h2>Qué ofrecemos</h2>
+        <p>
+          Cambio por otro artículo del mismo valor o crédito en tienda. Si hay diferencia de precio, la
+          ajustamos en efectivo o Transfermóvil.
+        </p>
+      </section>
+      <section>
+        <h2>Segunda mano</h2>
+        <p>
+          Los artículos de segunda mano se venden con su desgaste descrito e fotografiado. Por eso
+          insistimos: pide todas las fotos y medidas que quieras por WhatsApp antes de comprar.
+        </p>
+      </section>
+    </div>
+  </div>
+
+  <style>
+    .prose-legal h2 { font-size: 1.05rem; font-weight: 800; color: var(--fg); margin-bottom: .3rem; }
+  </style>
+</Base>

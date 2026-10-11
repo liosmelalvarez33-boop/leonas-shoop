@@ -4,6 +4,7 @@ import { formatPrice } from './format';
 import type { ConfigViva } from './vivo';
 import { addToCart } from './store';
 import { mensajeProducto, waLink } from './whatsapp';
+import { track } from './analytics';
 
 function escapear(s: string): string {
   return String(s).replace(/[&<>"']/g, (c) =>
@@ -190,6 +191,7 @@ export function montarDetalle(
       cantidad,
       imagen: p.imagenes[0] ?? 'logo.svg',
     });
+    track('cart_add', { producto_id: p.id, monto: p.precio * cantidad });
     avisar('Añadido al carrito');
   });
 
@@ -239,6 +241,7 @@ export function montarDetalle(
         if (r.ok) {
           msg.textContent = '✓ Te avisaremos por WhatsApp.';
           msg.className = 'text-xs font-semibold text-emerald-700';
+          track('espera_add', { producto_id: form.dataset.espera || '' });
           avisar('Guardado en lista de espera');
           form.reset();
         } else {

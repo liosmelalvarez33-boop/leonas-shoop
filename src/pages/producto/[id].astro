@@ -197,6 +197,7 @@ const breadcrumbLd = {
 
   <script>
     import { showToast } from '../../scripts/toast';
+    import { track } from '../../lib/analytics';
 
     document.querySelector('[data-abrir-guia]')?.addEventListener('click', () => {
       (document.getElementById('guia-tallas') as HTMLDialogElement | null)?.showModal();
@@ -221,6 +222,7 @@ const breadcrumbLd = {
           if (r.ok) {
             msg.textContent = '✓ Te avisaremos por WhatsApp.';
             msg.className = 'text-xs font-semibold text-emerald-700';
+            track('espera_add', { producto_id: form.dataset.espera || '' });
             showToast('Guardado en lista de espera');
             form.reset();
           } else {
