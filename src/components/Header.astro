@@ -16,15 +16,19 @@ const claseLink = (activa: boolean) =>
 <header class="sticky top-0 z-50 border-b border-line bg-panel/90 backdrop-blur">
   <div class="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-4 sm:px-6">
     <a href="/" class="flex items-center gap-2.5" aria-label={`${config.nombre} - Inicio`}>
-      <img
-        src="/logo-leonas-shoop.png"
-        alt=""
-        width="84"
-        height="56"
-        fetchpriority="high"
-        decoding="async"
-        class="h-12 w-auto shrink-0 sm:h-14"
-      />
+      <span
+        class="shrink-0 rounded-2xl px-1.5 py-1 ring-1 ring-brand-400/0 transition dark:bg-[#fffbeb] dark:px-2.5 dark:ring-brand-400/50 dark:shadow-md dark:shadow-black/30"
+      >
+        <img
+          src="/logo-leonas-shoop.png"
+          alt=""
+          width="72"
+          height="84"
+          fetchpriority="high"
+          decoding="async"
+          class="h-12 w-auto drop-shadow-[0_1px_6px_rgba(180,83,9,0.25)] sm:h-14"
+        />
+      </span>
       <span class="flex flex-col leading-tight">
         <span class="text-base font-extrabold tracking-tight text-fg">
           Leonas <span class="text-accent">Shoop</span>
