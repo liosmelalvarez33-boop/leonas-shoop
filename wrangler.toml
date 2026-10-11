@@ -7,7 +7,7 @@ pages_build_output_dir = "dist"
 [[d1_databases]]
 binding = "DB"
 database_name = "leonas-shoop"
-database_id = "REPLACE_WITH_D1_DATABASE_ID"
+database_id = "8a2b2c56-e2ba-490d-9a1c-2dc06c4fb707"
 
 # Bucket R2 para imágenes de productos optimizadas
 [[r2_buckets]]
