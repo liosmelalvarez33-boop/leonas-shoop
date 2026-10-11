@@ -10,10 +10,11 @@ database_name = "leonas-shoop"
 database_id = "8a2b2c56-e2ba-490d-9a1c-2dc06c4fb707"
 
 # Bucket R2 para imágenes de productos optimizadas
-[[r2_buckets]]
-binding = "IMAGES"
-bucket_name = "leonas-images"
-preview_bucket_name = "leonas-images-preview"
+# PENDIENTE: activar R2 en el dashboard y crear los buckets; luego descomentar.
+# [[r2_buckets]]
+# binding = "IMAGES"
+# bucket_name = "leonas-images"
+# preview_bucket_name = "leonas-images-preview"
 
 # KV legacy: productos, fotos, configuración y pedidos (respaldo de D1).
 [[kv_namespaces]]
