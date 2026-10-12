@@ -79,6 +79,7 @@ export async function onRequestPost({ request, env }) {
 
   const limpio = { ...producto, imagenes };
 
+  const anteriores = existente >= 0 && Array.isArray(lista[existente].imagenes) ? lista[existente].imagenes : [];
   if (existente >= 0) {
     lista[existente] = limpio;
   } else {
@@ -86,6 +87,21 @@ export async function onRequestPost({ request, env }) {
   }
 
   await env.DATOS.put('productos', JSON.stringify(lista));
+
+  // Fotos quitadas en el panel: borrar sus blobs para que no reaparezcan
+  // en la tienda (solo si ningún otro producto las usa).
+  const quitadas = anteriores.filter((f) => !imagenes.includes(f));
+  if (quitadas.length) {
+    const enUso = new Set();
+    for (const p of lista) for (const f of p.imagenes || []) enUso.add(f);
+    for (const f of quitadas) {
+      if (enUso.has(f)) continue;
+      await env.DATOS.delete(`fotos:${f}`).catch(() => {});
+      if (env.IMAGES && typeof env.IMAGES.delete === 'function') {
+        await env.IMAGES.delete(`products/${producto.id}/${f}`).catch(() => {});
+      }
+    }
+  }
 
   // Espejo en D1 (no bloquea si falla).
   if (env.DB && typeof env.DB.batch === 'function') {
@@ -147,15 +163,46 @@ export async function onRequestPost({ request, env }) {
           await env.DB.batch(borrar);
         }
       }
-      // Imágenes nuevas a R2 → registrar en D1.
-      if (r2Keys.length) {
-        const imgStmts = r2Keys.map((key, i) =>
+      // Imágenes: sincronizar D1 con la lista final del formulario.
+      // - Registra las nuevas (R2 o KV, con clave products/<id>/<archivo>).
+      // - Borra las filas que ya no están (si no, reaparecen en la tienda).
+      // - Reordena según la posición en el formulario.
+      const filas = await env.DB.prepare(
+        'SELECT id, r2_key, orden FROM product_images WHERE product_id = ?'
+      ).bind(producto.id).all().catch(() => ({ results: [] }));
+      const existentesImg = filas.results || [];
+      const nombreDe = (key) => String(key || '').split('/').pop() || '';
+      const porNombre = new Map(existentesImg.map((r) => [nombreDe(r.r2_key), r]));
+      const finales = (imagenes || []).slice(0, 10);
+
+      const nuevas = [];
+      for (const f of finales) {
+        if (porNombre.has(f)) continue;
+        const key = r2Keys.find((k) => nombreDe(k) === f) || `products/${producto.id}/${f}`;
+        nuevas.push(
           env.DB.prepare(
             'INSERT INTO product_images (product_id, r2_key, orden, alt_text) VALUES (?, ?, ?, ?)'
-          ).bind(producto.id, key, (producto.imagenes?.length || 0) + i, producto.titulo)
+          ).bind(producto.id, key, 0, producto.titulo)
         );
-        await env.DB.batch(imgStmts);
       }
+      if (nuevas.length) await env.DB.batch(nuevas);
+
+      const sobrantes = existentesImg.filter((r) => !finales.includes(nombreDe(r.r2_key)));
+      if (sobrantes.length) {
+        await env.DB.batch(
+          sobrantes.map((r) => env.DB.prepare('DELETE FROM product_images WHERE id = ?').bind(r.id))
+        );
+      }
+
+      const reorden = [];
+      const likeEsc = (s) => String(s).replace(/[\\%_]/g, (c) => '\\' + c);
+      finales.forEach((f, i) => {
+        reorden.push(
+          env.DB.prepare(`UPDATE product_images SET orden = ?, alt_text = ? WHERE product_id = ? AND r2_key LIKE ? ESCAPE '\\'`)
+            .bind(i, producto.titulo, producto.id, `%/` + likeEsc(f))
+        );
+      });
+      if (reorden.length) await env.DB.batch(reorden);
     } catch {
       /* D1 opcional en Fase 1 */
     }
