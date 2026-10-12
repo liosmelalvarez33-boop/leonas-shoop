@@ -3,6 +3,25 @@ export function tieneD1(env) {
   return Boolean(env && env.DB && typeof env.DB.prepare === 'function');
 }
 
+// Auditoría: registra acciones del panel (nunca bloquea si falla).
+export async function auditar(env, tipo, detalle = {}) {
+  if (!tieneD1(env)) return;
+  try {
+    await env.DB.prepare(
+      'INSERT INTO eventos (tipo, pagina, producto_id, pedido_id, monto, metodo) VALUES (?, ?, ?, ?, ?, ?)'
+    ).bind(
+      tipo,
+      typeof detalle.pagina === 'string' ? detalle.pagina.slice(0, 120) : 'admin',
+      typeof detalle.producto_id === 'string' ? detalle.producto_id.slice(0, 60) : null,
+      typeof detalle.pedido_id === 'string' ? detalle.pedido_id.slice(0, 80) : null,
+      Number.isInteger(detalle.monto) ? detalle.monto : null,
+      typeof detalle.metodo === 'string' ? detalle.metodo.slice(0, 20) : null
+    ).run();
+  } catch {
+    /* la auditoría nunca rompe la operación */
+  }
+}
+
 export function tieneR2(env) {
   return Boolean(env && env.IMAGES && typeof env.IMAGES.get === 'function');
 }

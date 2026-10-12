@@ -1,5 +1,6 @@
 // Eliminar producto: D1 (transacción) + KV (respaldo) + R2 (si existe).
 import { json, error, leerJson, exigirSesion, getProductos, esTexto } from '../../_lib.js';
+import { auditar } from '../../_d1.js';
 
 export async function onRequestPost({ request, env }) {
   const denegado = await exigirSesion(request, env);
@@ -61,6 +62,7 @@ export async function onRequestPost({ request, env }) {
     }
   }
 
+  await auditar(env, 'admin_eliminar_producto', { producto_id: id });
   return json({ ok: true, fuente: enD1 ? 'd1' : 'kv' });
 }
 

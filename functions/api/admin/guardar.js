@@ -7,6 +7,7 @@ import {
   getProductos,
   validarProducto,
 } from '../../_lib.js';
+import { auditar } from '../../_d1.js';
 
 const FORMATOS = [
   { ext: 'webp', prefijo: 'data:image/webp;base64,' },
@@ -208,5 +209,6 @@ export async function onRequestPost({ request, env }) {
     }
   }
 
+  await auditar(env, modo === 'crear' ? 'admin_crear_producto' : 'admin_editar_producto', { producto_id: producto.id });
   return json({ ok: true, producto: limpio });
 }

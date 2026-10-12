@@ -1,7 +1,7 @@
 // Pedidos del panel: listar, cambiar estado o eliminar.
 // Fase 1: D1 primero (estados extendidos + pago), KV como respaldo.
 import { json, error, leerJson, exigirSesion, getPedidos, esTexto } from '../../_lib.js';
-import { getPedidosD1, actualizarEstadoPedidoD1, eliminarPedidoD1, tieneD1, resolverReservaPedido } from '../../_d1.js';
+import { getPedidosD1, actualizarEstadoPedidoD1, eliminarPedidoD1, tieneD1, resolverReservaPedido, auditar } from '../../_d1.js';
 
 const ESTADOS = ['pendiente', 'confirmado', 'en_preparacion', 'en_camino', 'entregado', 'cancelado'];
 // Compatibilidad con estados antiguos.
@@ -41,6 +41,7 @@ export async function onRequestPost({ request, env }) {
         } else if (estado === 'cancelado') {
           await resolverReservaPedido(env, id, 'cancelar');
         }
+        await auditar(env, 'admin_pedido_estado', { pedido_id: id, metodo: estado });
         return json({ ok: true, fuente: 'd1' });
       }
     }
@@ -57,7 +58,10 @@ export async function onRequestPost({ request, env }) {
     if (tieneD1(env)) {
       await resolverReservaPedido(env, id, 'cancelar');
       const ok = await eliminarPedidoD1(env, id);
-      if (ok) return json({ ok: true, fuente: 'd1' });
+      if (ok) {
+        await auditar(env, 'admin_eliminar_pedido', { pedido_id: id });
+        return json({ ok: true, fuente: 'd1' });
+      }
     }
     const pedidos = await getPedidos(env);
     const indice = pedidos.findIndex((p) => p.id === id);
@@ -72,6 +76,7 @@ export async function onRequestPost({ request, env }) {
     if (tieneD1(env)) {
       try {
         await env.DB.prepare('UPDATE orders SET pago_confirmado = ? WHERE id = ?').bind(confirmado ? 1 : 0, id).run();
+        await auditar(env, 'admin_confirmar_pago', { pedido_id: id });
         return json({ ok: true, fuente: 'd1' });
       } catch {
         /* caer a KV */
