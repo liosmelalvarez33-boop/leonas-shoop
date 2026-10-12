@@ -55,15 +55,13 @@ const jsonLd = {
     <div class="dots pointer-events-none absolute inset-0 opacity-30 dark:opacity-15"></div>
 
     <div class="relative mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20 lg:py-24">
-      <div class="lg:max-w-xl lg:pr-6">
-        <div class="relative inline-block">
+      <div class="text-center sm:text-left lg:max-w-xl lg:pr-6">
+        <div class="relative flex justify-center sm:justify-start">
           <div
-            class="pointer-events-none absolute left-1/2 top-1/2 -z-0 h-40 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full bg-brand-400/30 blur-3xl dark:bg-brand-500/20"
+            class="pointer-events-none absolute left-1/2 top-1/2 -z-0 h-44 w-72 -translate-x-1/2 -translate-y-1/2 rounded-full bg-brand-400/30 blur-3xl sm:left-24 sm:translate-x-0 dark:bg-brand-500/25"
             aria-hidden="true"
           ></div>
-          <span
-            class="relative inline-block rounded-[2rem] px-4 py-3 ring-1 ring-brand-400/0 transition dark:bg-[#fffbeb] dark:px-6 dark:ring-brand-400/50 dark:shadow-xl dark:shadow-black/40"
-          >
+          <span class="relative inline-block">
             <img
               src="/logo-leonas-shoop.png"
               alt="Leonas Shoop"
@@ -71,7 +69,16 @@ const jsonLd = {
               height="268"
               fetchpriority="high"
               decoding="async"
-              class="h-28 w-auto drop-shadow-[0_2px_12px_rgba(180,83,9,0.3)] sm:h-36"
+              class="h-40 w-auto drop-shadow-[0_2px_12px_rgba(180,83,9,0.3)] sm:h-36 dark:hidden"
+            />
+            <img
+              src="/logo-leonas-shoop-dark.png"
+              alt="Leonas Shoop"
+              width="200"
+              height="240"
+              fetchpriority="high"
+              decoding="async"
+              class="hidden h-40 w-auto drop-shadow-[0_0_18px_rgba(251,191,36,0.45)] sm:h-36 dark:block"
             />
           </span>
         </div>
@@ -96,15 +103,15 @@ const jsonLd = {
           directo por WhatsApp: sin registros, sin esperas.
         </p>
 
-        <div class="mt-8 flex flex-wrap gap-3">
+        <div class="mt-8 flex flex-wrap justify-center gap-3 sm:justify-start">
           <a href="/catalogo" class="btn-base btn-primary">Ver catálogo</a>
           <a href={waGeneral} target="_blank" rel="noopener noreferrer" class="btn-base btn-wa"
             >Escríbenos por WhatsApp</a
           >
         </div>
 
-        <ul class="mt-10 grid gap-3 text-sm font-medium text-fg-muted sm:grid-cols-2">
-          <li class="flex items-center gap-2">
+        <ul class="mx-auto mt-10 grid w-fit gap-3 text-sm font-medium text-fg-muted sm:mx-0 sm:w-auto sm:grid-cols-2">
+          <li class="flex items-center justify-center gap-2 sm:justify-start">
             <svg class="h-4 w-4 shrink-0 text-accent" viewBox="0 0 20 20" fill="currentColor"
               ><path
                 fill-rule="evenodd"
@@ -112,7 +119,7 @@ const jsonLd = {
                 clip-rule="evenodd"></path></svg
             >Precios en {config.moneda}
           </li>
-          <li class="flex items-center gap-2">
+          <li class="flex items-center justify-center gap-2 sm:justify-start">
             <svg class="h-4 w-4 shrink-0 text-accent" viewBox="0 0 20 20" fill="currentColor"
               ><path
                 fill-rule="evenodd"
