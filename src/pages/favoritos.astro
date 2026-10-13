@@ -58,7 +58,7 @@ import Base from '../layouts/Base.astro';
         .map(
           (f) => `
         <article class="card group relative flex flex-col">
-          <a href="/producto/${encodeURIComponent(f.id)}" class="flex flex-1 flex-col">
+          <a href="/catalogo?p=${encodeURIComponent(f.id)}" class="flex flex-1 flex-col">
             <div class="relative aspect-[4/5] overflow-hidden bg-sunken">
               <img src="${esc(srcDe(f.imagen))}" alt="${esc(f.titulo)}" width="400" height="500" loading="lazy" decoding="async" class="h-full w-full object-cover" onerror="this.onerror=null;this.src='/img/logo.svg'" />
             </div>
@@ -68,7 +68,7 @@ import Base from '../layouts/Base.astro';
             </div>
           </a>
           <div class="flex gap-2 p-4 pt-0">
-            <a href="/producto/${encodeURIComponent(f.id)}" class="btn-base btn-primary flex-1 text-center text-sm">Ver</a>
+            <a href="/catalogo?p=${encodeURIComponent(f.id)}" class="btn-base btn-primary flex-1 text-center text-sm">Ver</a>
             <button type="button" data-quitar="${esc(f.id)}" class="btn-base btn-outline text-sm">Quitar</button>
           </div>
         </article>`,

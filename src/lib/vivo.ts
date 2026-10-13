@@ -1,6 +1,8 @@
 // Datos en vivo: trae el catálogo desde la nube y mantiene la web actualizada.
 import type { Categoria, Producto } from './types';
 import { formatPrice } from './format';
+import { getCart, removeFromCart } from './store';
+import { getFavs, quitarFav } from './favoritos';
 
 export type ConfigViva = {
   nombre: string;
@@ -67,6 +69,9 @@ export async function hidratar(): Promise<void> {
 
   for (const fn of fijadores) fn(cfg);
 
+  // Nada de productos borrados: limpia carrito y favoritos de fantasmas.
+  purgarFantasmas(datos.productos);
+
   // Enlaces de WhatsApp (el número puede cambiar desde el panel).
   for (const a of document.querySelectorAll<HTMLAnchorElement>('a[href*="wa.me/"]')) {
     a.href = a.href.replace(/wa\.me\/\d+/, `wa.me/${cfg.whatsapp}`);
@@ -79,13 +84,9 @@ export async function hidratar(): Promise<void> {
     if (typeof valor === 'string' && valor) el.textContent = valor;
   }
 
-  // Menús y rejillas de categorías (pueden crecer desde el panel).
+  // Menús y rejillas de categorías (los conteos cambian con los productos).
   for (const cont of document.querySelectorAll<HTMLElement>('[data-categorias]')) {
     const variante = cont.dataset.categorias;
-    const slugs = [...cont.querySelectorAll('[data-slug]')].map((x) => x.getAttribute('data-slug'));
-    const actuales = cfg.categorias.map((c) => c.slug);
-    const mismoOrden = slugs.length === actuales.length && slugs.every((s, i) => s === actuales[i]);
-    if (mismoOrden) continue;
     cont.innerHTML =
       variante === 'grid'
         ? cfg.categorias.map((c) => tarjetaCategoria(c, datos.productos)).join('')
@@ -97,11 +98,13 @@ export async function hidratar(): Promise<void> {
             .join('');
   }
 
-  // Rejilla de destacados de la portada.
+  // Rejilla de destacados de la portada (si no queda nada, se oculta la sección).
   const destacadosEl = document.getElementById('destacados-grid');
   if (destacadosEl) {
     const destacados = listaDestacados(datos.productos);
     destacadosEl.innerHTML = destacados.map((p) => tarjetaProducto(p, cfg)).join('');
+    const seccion = destacadosEl.closest('section');
+    if (seccion) seccion.classList.toggle('hidden', destacados.length === 0);
     window.dispatchEvent(new CustomEvent('favs:changed'));
   }
 }
@@ -110,6 +113,22 @@ function escapear(s: string): string {
   return String(s).replace(/[&<>"']/g, (c) =>
     ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c] as string,
   );
+}
+
+// Quita del carrito y de los favoritos los productos que ya no están a la venta.
+function purgarFantasmas(productos: Producto[]): void {
+  const vivos = new Set(productos.map((p) => p.id));
+  try {
+    const carrito = getCart();
+    for (let i = carrito.length - 1; i >= 0; i--) {
+      if (!vivos.has(carrito[i].id)) removeFromCart(i);
+    }
+    for (const fav of getFavs()) {
+      if (!vivos.has(fav.id)) quitarFav(fav.id);
+    }
+  } catch {
+    /* almacenamiento no disponible */
+  }
 }
 
 export function listaDestacados(productos: Producto[]): Producto[] {
