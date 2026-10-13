@@ -24,16 +24,7 @@ const claseLink = (activa: boolean) =>
           height="84"
           fetchpriority="high"
           decoding="async"
-          class="h-12 w-auto drop-shadow-[0_1px_6px_rgba(180,83,9,0.25)] sm:h-14 dark:hidden"
-        />
-        <img
-          src="/logo-leonas-shoop-dark.png"
-          alt=""
-          width="60"
-          height="72"
-          fetchpriority="high"
-          decoding="async"
-          class="hidden h-12 w-auto drop-shadow-[0_0_10px_rgba(251,191,36,0.4)] sm:h-14 dark:block"
+          class="h-12 w-auto drop-shadow-[0_1px_6px_rgba(180,83,9,0.25)] sm:h-14"
         />
       </span>
       <span class="flex flex-col leading-tight">
@@ -91,25 +82,6 @@ const claseLink = (activa: boolean) =>
 
     <div class="flex items-center gap-2">
       <InstallButton />
-
-      <button
-        type="button"
-        id="theme-toggle"
-        class="flex h-9 w-9 items-center justify-center rounded-xl border border-line bg-panel text-fg-muted transition hover:border-brand-400 hover:text-accent"
-        aria-label="Cambiar a modo oscuro"
-        title="Cambiar modo claro/oscuro"
-      >
-        <svg class="h-5 w-5 dark:hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-          stroke-width="1.8" stroke-linecap="round"
-          ><circle cx="12" cy="12" r="4"></circle><path
-            d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"
-          ></path></svg
-        >
-        <svg class="hidden h-5 w-5 dark:block" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-          stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
-          ><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"></path></svg
-        >
-      </button>
 
       <a
         href="/favoritos"
@@ -218,24 +190,5 @@ const claseLink = (activa: boolean) =>
     const abierto = menu?.classList.toggle('hidden') === false;
     toggle.setAttribute('aria-expanded', String(abierto));
     toggle.setAttribute('aria-label', abierto ? 'Cerrar menú' : 'Abrir menú');
-  });
-
-  const botonTema = document.getElementById('theme-toggle');
-  const esOscuro = () => document.documentElement.classList.contains('dark');
-  const etiquetaTema = () =>
-    botonTema?.setAttribute(
-      'aria-label',
-      esOscuro() ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro',
-    );
-  etiquetaTema();
-
-  botonTema?.addEventListener('click', () => {
-    const oscuro = document.documentElement.classList.toggle('dark');
-    try {
-      localStorage.setItem('leonas_shoop_tema', oscuro ? 'dark' : 'light');
-    } catch {
-      /* almacenamiento no disponible */
-    }
-    etiquetaTema();
   });
 </script>

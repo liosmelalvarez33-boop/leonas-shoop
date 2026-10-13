@@ -1,7 +1,5 @@
 @import "tailwindcss";
 
-@custom-variant dark (&:where(.dark, .dark *));
-
 @theme {
   --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, "Noto Sans", sans-serif;
@@ -18,7 +16,7 @@
   --color-brand-800: #92400e;
   --color-brand-900: #78350f;
 
-  /* Superficies y texto (se invierten en modo oscuro) */
+  /* Superficies y texto */
   --color-page: #ffffff;
   --color-panel: #ffffff;
   --color-sunken: #fafaf9;
@@ -34,24 +32,6 @@
 
   --color-wa: #25d366;
   --color-wa-dark: #1fb855;
-}
-
-html.dark {
-  --color-page: #0c0a09;
-  --color-panel: #1c1917;
-  --color-sunken: #14120f;
-  --color-line: #302c27;
-  --color-line-2: #4c4640;
-  --color-fg: #f5f5f4;
-  --color-fg-muted: #d6d3d1;
-  --color-fg-subtle: #a8a29e;
-  --color-fg-faint: #78716c;
-
-  --color-accent: #fbbf24;
-
-  --color-brand-50: #2b1e07;
-  --color-brand-100: #3a290a;
-  --color-brand-800: #fcd34d;
 }
 
 @layer base {
