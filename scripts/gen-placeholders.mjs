@@ -63,33 +63,13 @@ function ogSvg() {
       <stop offset="60%" stop-color="#92400e"/>
       <stop offset="100%" stop-color="#57270a"/>
     </linearGradient>
-    <linearGradient id="mark" x1="6" y1="2" x2="58" y2="62" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#fbbf24"/>
-      <stop offset="0.55" stop-color="#f59e0b"/>
-      <stop offset="1" stop-color="#b45309"/>
-    </linearGradient>
   </defs>
   <rect width="1200" height="630" fill="url(#bg)"/>
   <circle cx="1060" cy="90" r="250" fill="#fbbf24" opacity="0.10"/>
   <circle cx="120" cy="580" r="210" fill="#000000" opacity="0.14"/>
-  <g transform="translate(80 90)">
-    <rect width="110" height="110" rx="30" fill="url(#mark)"/>
-    <g transform="scale(1.71875)">
-      <g stroke="#fff" stroke-width="1.7" stroke-linecap="round" opacity="0.95">
-        <path d="M16.5 37.5 7.5 35.5"/>
-        <path d="M16.5 41.5 7.5 43"/>
-        <path d="M47.5 37.5 56.5 35.5"/>
-        <path d="M47.5 41.5 56.5 43"/>
-      </g>
-      <circle cx="20.5" cy="21.5" r="7.5" fill="#fff"/>
-      <circle cx="43.5" cy="21.5" r="7.5" fill="#fff"/>
-      <circle cx="32" cy="34.5" r="14.5" fill="#fff"/>
-      <ellipse cx="27" cy="32.5" rx="2.3" ry="2.9" fill="#78350f"/>
-      <ellipse cx="37" cy="32.5" rx="2.3" ry="2.9" fill="#78350f"/>
-      <path d="M29.1 37.4H34.9L32 40.1Z" fill="#78350f"/>
-      <path d="M32 40.1v1.6M32 41.7q-2.7 2.7-5.2.5M32 41.7q2.7 2.7 5.2.5" fill="none" stroke="#78350f" stroke-width="1.5" stroke-linecap="round"/>
-    </g>
-  </g>
+  <svg x="80" y="90" width="110" height="110" viewBox="0 0 64 64">${logoSvg()
+    .replace(/^<svg[^>]*>/, '')
+    .replace(/<\/svg>\s*$/, '')}</svg>
   <text x="80" y="330" font-family="system-ui, -apple-system, Segoe UI, Roboto, sans-serif" font-size="92" font-weight="800" fill="#ffffff">${nombre}</text>
   <text x="80" y="400" font-family="system-ui, -apple-system, Segoe UI, Roboto, sans-serif" font-size="36" font-weight="500" fill="#ffffff" fill-opacity="0.9">${slogan}</text>
   <rect x="80" y="455" width="600" height="80" rx="40" fill="#ffffff" fill-opacity="0.16"/>
@@ -99,31 +79,48 @@ function ogSvg() {
 `;
 }
 
-function faviconSvg() {
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+function logoSvg() {
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="${escapeXml(config.nombre)}">
   <defs>
-    <linearGradient id="f-g" x1="4" y1="2" x2="60" y2="62" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#fbbf24"/>
+    <linearGradient id="ls-bg" x1="8" y1="4" x2="56" y2="60" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#4a2c0c"/>
+      <stop offset="1" stop-color="#2a1806"/>
+    </linearGradient>
+    <linearGradient id="ls-line" x1="16" y1="14" x2="48" y2="52" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#fcd34d"/>
       <stop offset="0.55" stop-color="#f59e0b"/>
-      <stop offset="1" stop-color="#b45309"/>
+      <stop offset="1" stop-color="#d97706"/>
     </linearGradient>
   </defs>
-  <rect width="64" height="64" rx="17" fill="url(#f-g)"/>
-  <g stroke="#fff" stroke-width="1.7" stroke-linecap="round" opacity="0.95">
-    <path d="M16.5 37.5 7.5 35.5"/>
-    <path d="M16.5 41.5 7.5 43"/>
-    <path d="M47.5 37.5 56.5 35.5"/>
-    <path d="M47.5 41.5 56.5 43"/>
+  <rect width="64" height="64" rx="15" fill="url(#ls-bg)"/>
+  <rect x="2.5" y="2.5" width="59" height="59" rx="12.5" fill="none" stroke="#d97706" stroke-width="1" opacity="0.5"/>
+  <g stroke="url(#ls-line)" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path stroke-width="2.1" d="M32 16.6
+      C36 16.6 39.2 17.4 41.8 19
+      C45.2 21 47.6 25 47.9 30.2
+      C48.4 37.8 46.8 44.4 42.4 47.9
+      C39 50.6 35.8 51.7 32 51.7
+      C28.2 51.7 25 50.6 21.6 47.9
+      C17.2 44.4 15.6 37.8 16.1 30.2
+      C16.4 25 18.8 21 22.2 19
+      C24.8 17.4 28 16.6 32 16.6 Z"/>
+    <path stroke-width="1.9" d="M19.4 21.4 C16.6 15 23.2 13.4 26 18.2"/>
+    <path stroke-width="1.9" d="M44.6 21.4 C47.4 15 40.8 13.4 38 18.2"/>
+    <path stroke-width="1.2" opacity="0.8" d="M21.1 20.5 C20.2 17.1 23.9 16.4 25.1 19.4"/>
+    <path stroke-width="1.2" opacity="0.8" d="M42.9 20.5 C43.8 17.1 40.1 16.4 38.9 19.4"/>
+    <path stroke-width="1.5" d="M32 42.6 L32 44.2 M32 44.2 C30.7 46.7 28.2 47.3 26.6 45.6 M32 44.2 C33.3 46.7 35.8 47.3 37.4 45.6"/>
+    <path stroke-width="1.3" opacity="0.9" d="M18.4 37.2 L12.4 36.4 M19.8 42 L14 43.4"/>
+    <path stroke-width="1.3" opacity="0.9" d="M45.6 37.2 L51.6 36.4 M44.2 42 L50 43.4"/>
+    <path stroke-width="1.4" fill="url(#ls-line)" d="M23.2 33.6 Q27 31.6 30.6 34 Q27 36.2 23.2 33.6 Z"/>
+    <path stroke-width="1.4" fill="url(#ls-line)" d="M40.8 33.6 Q37 31.6 33.4 34 Q37 36.2 40.8 33.6 Z"/>
   </g>
-  <circle cx="20.5" cy="21.5" r="7.5" fill="#fff"/>
-  <circle cx="43.5" cy="21.5" r="7.5" fill="#fff"/>
-  <circle cx="32" cy="34.5" r="14.5" fill="#fff"/>
-  <ellipse cx="27" cy="32.5" rx="2.3" ry="2.9" fill="#78350f"/>
-  <ellipse cx="37" cy="32.5" rx="2.3" ry="2.9" fill="#78350f"/>
-  <path d="M29.1 37.4H34.9L32 40.1Z" fill="#78350f"/>
-  <path d="M32 40.1v1.6M32 41.7q-2.7 2.7-5.2.5M32 41.7q2.7 2.7 5.2.5" fill="none" stroke="#78350f" stroke-width="1.5" stroke-linecap="round"/>
+  <path d="M29.2 38.8 C30.7 37.9 33.3 37.9 34.8 38.8 C35.7 40.1 35 41.2 32 42.6 C29 41.2 28.3 40.1 29.2 38.8 Z" fill="url(#ls-line)"/>
 </svg>
 `;
+}
+
+function faviconSvg() {
+  return logoSvg().replace('viewBox="0 0 64 64"', 'width="64" height="64" viewBox="0 0 64 64"');
 }
 
 let creados = 0;
