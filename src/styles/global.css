@@ -233,3 +233,304 @@
     transition: none;
   }
 }
+
+/* ==================================================================== */
+/* =========  REDISEÑO LIMPIO PASTEL — skill clean-pastel-redesign  ==== */
+/* Las reglas planas al final ganan la cascada sobre las capas de      */
+/* Tailwind: re-estilizan sin romper las clases existentes.            */
+/* ==================================================================== */
+
+/* ---------- Modo oscuro por clase (toggle ☀/🌙 del header) ---------- */
+@custom-variant dark (&:where(.dark, .dark *));
+
+html.dark {
+  /* Superficies cálidas (carbón con tinte león) */
+  --color-page: #1a1410;
+  --color-panel: #261d15;
+  --color-sunken: #2e241b;
+  --color-line: #3d3023;
+  --color-line-2: #4e3d2c;
+  --color-fg: #f8f2e9;
+  --color-fg-muted: #ddd2c4;
+  --color-fg-subtle: #b8a996;
+  --color-fg-faint: #97897a;
+  /* Tintes y acentos legibles sobre oscuro */
+  --color-accent: #fbbf24;
+  --color-brand-50: #2e2317;
+  --color-brand-100: #3d2d1c;
+  --color-brand-200: #4e3a24;
+  color-scheme: dark;
+}
+
+html {
+  --ls-scene: radial-gradient(85% 46% at 50% 0%, rgb(245 158 11 / 0.1), transparent 62%),
+    linear-gradient(165deg, #fffdf6 0%, #fff9ec 42%, #fffdf6 100%);
+}
+html.dark {
+  --ls-scene: radial-gradient(85% 46% at 50% 0%, rgb(245 158 11 / 0.07), transparent 62%),
+    linear-gradient(165deg, #1c1511 0%, #221a12 50%, #1a1410 100%);
+}
+body {
+  background-color: var(--color-page);
+  background-image: var(--ls-scene);
+  background-attachment: fixed;
+}
+
+/* ---------- Tipografía display (más personalidad de tienda) ---------- */
+body {
+  font-family: "Nunito", var(--font-sans);
+}
+
+/* ---------- Botones pastilla ---------- */
+.btn-base {
+  border-radius: 999px;
+  padding: 0.8rem 1.5rem;
+  font-weight: 700;
+}
+.btn-base:active {
+  transform: scale(0.97);
+}
+.btn-primary {
+  background-image: linear-gradient(135deg, var(--color-brand-500), var(--color-brand-700));
+  box-shadow: 0 10px 24px -10px rgb(180 83 9 / 0.65);
+}
+.btn-base:disabled {
+  transform: none;
+}
+
+/* ---------- Tarjetas limpias ---------- */
+.card {
+  border-radius: 1.25rem;
+  border-color: var(--color-line);
+  box-shadow:
+    0 2px 6px -2px rgb(120 53 10 / 0.08),
+    0 14px 34px -16px rgb(120 53 10 / 0.16);
+}
+.card:hover {
+  box-shadow:
+    0 4px 10px -3px rgb(120 53 10 / 0.12),
+    0 20px 44px -16px rgb(120 53 10 / 0.22);
+}
+
+/* ---------- Chips, inputs, badge ---------- */
+.chip {
+  border-radius: 999px;
+  padding: 0.55rem 1rem;
+  font-weight: 700;
+}
+.chip.is-active {
+  border-radius: 999px;
+}
+.input {
+  border-radius: 1rem;
+  background-color: var(--color-panel);
+}
+.badge {
+  font-weight: 700;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+/* ---------- Navegación inferior tipo app (mobile) ---------- */
+.mnav {
+  position: fixed;
+  left: 0.7rem;
+  right: 0.7rem;
+  bottom: calc(0.6rem + env(safe-area-inset-bottom, 0px));
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgb(255 255 255 / 0.78);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgb(180 83 9 / 0.1);
+  border-radius: 1.4rem;
+  padding: 0.4rem 0.5rem;
+  box-shadow:
+    0 4px 10px -4px rgb(120 53 10 / 0.12),
+    0 16px 38px -14px rgb(120 53 10 / 0.35);
+}
+html.dark .mnav {
+  background: rgb(38 29 21 / 0.82);
+  border-color: rgb(251 191 36 / 0.09);
+}
+@media (min-width: 768px) {
+  .mnav {
+    display: none;
+  }
+}
+.mnav-item {
+  position: relative;
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  padding: 0.5rem 0 0.45rem;
+  border-radius: 1rem;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: var(--color-fg-faint);
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+.mnav-item svg {
+  height: 1.4rem;
+  width: 1.4rem;
+}
+.mnav-item.activo {
+  background: linear-gradient(135deg, var(--color-brand-600), var(--color-brand-500));
+  color: #ffffff;
+}
+.mnav-cnt {
+  position: absolute;
+  top: 0.15rem;
+  right: max(0.5rem, 50% - 1.4rem);
+  min-width: 1.15rem;
+  border-radius: 999px;
+  padding: 0 0.3rem;
+  text-align: center;
+  font-size: 0.62rem;
+  font-weight: 800;
+  line-height: 1.05;
+}
+.mnav-fab {
+  position: relative;
+  flex: 0 0 auto;
+  width: 3.5rem;
+  height: 3.5rem;
+  margin: 0 0.3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-brand-500), var(--color-brand-700));
+  color: #ffffff;
+  transform: translateY(-0.6rem);
+  box-shadow:
+    0 14px 30px -10px rgb(180 83 9 / 0.6),
+    inset 0 1.5px 0 rgb(255 255 255 / 0.35);
+  transition: transform 0.2s cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+.mnav-fab:active {
+  transform: translateY(-0.6rem) scale(0.88);
+}
+.mnav-fab .mnav-cnt {
+  top: -0.4rem;
+  right: -0.3rem;
+  background-color: #ffffff;
+  color: var(--color-brand-700);
+  box-shadow: 0 2px 6px rgb(0 0 0 / 0.25);
+}
+/* Espacio para la nav (respeta safe area) */
+@media (max-width: 767px) {
+  body {
+    padding-bottom: calc(6rem + env(safe-area-inset-bottom, 0px));
+  }
+}
+/* El FAB de WhatsApp y las cookies suben para no pisar la nav */
+@media (max-width: 767px) {
+  .wa-fab {
+    bottom: calc(5.6rem + env(safe-area-inset-bottom, 0px)) !important;
+  }
+  .cookie-banner {
+    bottom: calc(5.6rem + env(safe-area-inset-bottom, 0px)) !important;
+  }
+}
+
+/* ---------- Header ---------- */
+header {
+  background: rgb(255 255 255 / 0.85);
+  -webkit-backdrop-filter: saturate(1.4) blur(14px);
+  backdrop-filter: saturate(1.4) blur(14px);
+}
+html.dark header {
+  background: rgb(26 20 16 / 0.8);
+}
+
+/* ---------- Héroe con escena pastel ---------- */
+.hero-scene {
+  position: relative;
+  overflow: hidden;
+}
+.hero-badge {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.85rem;
+  border-radius: 50%;
+  background: var(--color-panel);
+  border: 1px solid rgb(180 83 9 / 0.12);
+  box-shadow:
+    0 4px 10px -4px rgb(120 53 10 / 0.15),
+    0 18px 40px -18px rgb(120 53 10 / 0.35);
+  animation: protagonista-flota 3.6s ease-in-out infinite;
+}
+html.dark .hero-badge {
+  border-color: rgb(251 191 36 / 0.14);
+}
+.hero-badge img {
+  height: 6.4rem;
+  width: auto;
+}
+.hero-dato {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  border-radius: 999px;
+  border: 1px solid var(--color-line);
+  background: var(--color-panel);
+  padding: 0.5rem 0.95rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--color-fg-muted);
+  box-shadow: 0 3px 10px -4px rgb(120 53 10 / 0.12);
+}
+@keyframes protagonista-flota {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-0.45rem);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-badge {
+    animation: none;
+  }
+}
+
+/* ---------- Botón de tema ---------- */
+.theme-btn {
+  height: 2.25rem;
+  width: 2.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: 1px solid var(--color-line);
+  background: rgb(255 255 255 / 0.65);
+  color: var(--color-fg-muted);
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+html.dark .theme-btn {
+  background: rgb(46 36 27 / 0.65);
+}
+.theme-btn:hover {
+  border-color: var(--color-brand-400);
+  color: var(--color-accent);
+}
+.theme-btn:active {
+  transform: scale(0.9);
+}
+
+/* ---------- Detalles ---------- */
+footer .reveal {
+  /* nada especial, hook por si acaso */
+}
+
+/* Sombra del encabezado pegajoso más suave */

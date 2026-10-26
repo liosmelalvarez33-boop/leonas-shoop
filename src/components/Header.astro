@@ -83,6 +83,17 @@ const claseLink = (activa: boolean) =>
     <div class="flex items-center gap-2">
       <InstallButton />
 
+      <button type="button" id="theme-toggle" class="theme-btn" aria-label="Cambiar tema claro/oscuro">
+        <svg class="theme-btn-luna hidden h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"
+          ><path
+            d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"></path></svg
+        >
+        <svg class="theme-btn-sol hidden h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"
+          ><circle cx="12" cy="12" r="4.4"></circle><path
+            d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M19.1 4.9l-1.4 1.4M6.3 17.7l-1.4 1.4"></path></svg
+        >
+      </button>
+
       <a
         href="/favoritos"
         class="relative hidden h-9 w-9 items-center justify-center rounded-xl border border-line bg-panel text-fg-muted transition hover:border-brand-400 hover:text-accent sm:flex"
@@ -95,7 +106,7 @@ const claseLink = (activa: boolean) =>
         >
         <span
           id="favs-count"
-          class="absolute -right-1.5 -top-1.5 hidden min-w-[1.25rem] rounded-full bg-rose-600 px-1 text-center text-[11px] font-bold leading-5 text-white"
+          class="js-fav-count absolute -right-1.5 -top-1.5 hidden min-w-[1.25rem] rounded-full bg-rose-600 px-1 text-center text-[11px] font-bold leading-5 text-white"
           >0</span
         >
       </a>
@@ -113,7 +124,7 @@ const claseLink = (activa: boolean) =>
         >
         <span
           id="cart-count"
-          class="absolute -right-1.5 -top-1.5 hidden min-w-[1.25rem] rounded-full bg-brand-600 px-1 text-center text-[11px] font-bold leading-5 text-white"
+          class="js-cart-count absolute -right-1.5 -top-1.5 hidden min-w-[1.25rem] rounded-full bg-brand-600 px-1 text-center text-[11px] font-bold leading-5 text-white"
           >0</span
         >
       </a>
@@ -173,11 +184,11 @@ const claseLink = (activa: boolean) =>
   import { contar } from '../lib/store';
 
   function sincronizarContador() {
-    const el = document.getElementById('cart-count');
-    if (!el) return;
     const n = contar();
-    el.textContent = String(n);
-    el.classList.toggle('hidden', n === 0);
+    for (const el of document.querySelectorAll<HTMLElement>('.js-cart-count')) {
+      el.textContent = String(n);
+      el.classList.toggle('hidden', n === 0);
+    }
   }
 
   sincronizarContador();
@@ -190,5 +201,21 @@ const claseLink = (activa: boolean) =>
     const abierto = menu?.classList.toggle('hidden') === false;
     toggle.setAttribute('aria-expanded', String(abierto));
     toggle.setAttribute('aria-label', abierto ? 'Cerrar menú' : 'Abrir menú');
+  });
+
+  // Tema claro/oscuro (decide el usuario, se recuerda)
+  const themeBtn = document.getElementById('theme-toggle');
+  function pintarIconos() {
+    const oscuro = document.documentElement.classList.contains('dark');
+    themeBtn?.querySelector('.theme-btn-luna')?.classList.toggle('hidden', oscuro);
+    themeBtn?.querySelector('.theme-btn-sol')?.classList.toggle('hidden', !oscuro);
+  }
+  pintarIconos();
+  themeBtn?.addEventListener('click', () => {
+    const oscuro = document.documentElement.classList.toggle('dark');
+    try {
+      localStorage.setItem('tema-leonas', oscuro ? 'dark' : 'light');
+    } catch {}
+    pintarIconos();
   });
 </script>

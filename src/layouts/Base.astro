@@ -2,6 +2,7 @@
 import '../styles/global.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import MobileNav from '../components/MobileNav.astro';
 import WhatsAppFab from '../components/WhatsAppFab.astro';
 import CookieBanner from '../components/CookieBanner.astro';
 import config from '../data/config.json';
@@ -35,6 +36,24 @@ const ogImage = new URL(image ?? '/img/og-cover.png', Astro.site);
     <script is:inline>
       document.documentElement.classList.add('js');
     </script>
+    <script is:inline>
+      // Tema: sin parpadeo (se decide antes del primer paint)
+      (function () {
+        try {
+          var guardado = localStorage.getItem('tema-leonas');
+          var oscuro = guardado
+            ? guardado === 'dark'
+            : window.matchMedia('(prefers-color-scheme: dark)').matches;
+          if (oscuro) document.documentElement.classList.add('dark');
+        } catch (e) {}
+      })();
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800;900&display=swap"
+    />
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
@@ -89,6 +108,7 @@ const ogImage = new URL(image ?? '/img/og-cover.png', Astro.site);
       <slot />
     </main>
     <Footer />
+    <MobileNav />
     <WhatsAppFab />
     <CookieBanner />
 
@@ -137,7 +157,7 @@ const ogImage = new URL(image ?? '/img/og-cover.png', Astro.site);
           if (svg) svg.setAttribute('fill', activo ? 'currentColor' : 'none');
         }
         const n = document.querySelectorAll('.fav-btn[aria-pressed="true"]').length;
-        for (const c of document.querySelectorAll<HTMLElement>('#favs-count')) {
+        for (const c of document.querySelectorAll<HTMLElement>('.js-fav-count')) {
           c.textContent = String(n);
           c.classList.toggle('hidden', n === 0);
         }
